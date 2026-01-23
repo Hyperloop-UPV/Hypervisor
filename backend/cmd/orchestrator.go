@@ -13,7 +13,6 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
-	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
 	"github.com/pkg/browser"
 	trace "github.com/rs/zerolog/log"
 )
@@ -79,21 +78,6 @@ func createPacketIDToBoard(
 	return idToBoard
 }
 
-// createIPToBoardID builds a lookup table that maps an IP address
-// to its corresponding BoardId using ADJ metadata.
-func createIPToBoardID(
-	adj adj_module.ADJ,
-) map[string]abstraction.BoardId {
-
-	ipToBoardID := make(map[string]abstraction.BoardId)
-
-	for name, ip := range adj.Info.Addresses {
-		ipToBoardID[ip] = abstraction.BoardId(adj.Info.BoardIds[name])
-	}
-
-	return ipToBoardID
-}
-
 // createBoardToPackets builds a lookup table that maps each board
 // to the list of PacketIds it produces.
 func createBoardToPackets(
@@ -125,20 +109,17 @@ func createLookupTables(
 	adj adj_module.ADJ,
 ) (
 	map[abstraction.PacketId]string,
-	map[string]abstraction.BoardId,
 	map[abstraction.TransportTarget][]abstraction.PacketId,
 ) {
 
 	return createPacketIDToBoard(podData),
-		createIPToBoardID(adj),
 		createBoardToPackets(podData)
 }
 
 func setUpLogger(config config.Config) (*logger.Logger, SubloggersMap) {
 
 	var subloggers = SubloggersMap{
-		data_logger.Name:  data_logger.NewLogger(),
-		order_logger.Name: order_logger.NewLogger(),
+		data_logger.Name: data_logger.NewLogger(),
 	}
 
 	logger.ConfigureLogger(config.Logging.TimeUnit, config.Logging.LoggingPath)

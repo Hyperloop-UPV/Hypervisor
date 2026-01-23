@@ -34,7 +34,7 @@ type UpdateFactory struct {
 	boardToPackets  map[abstraction.TransportTarget][]abstraction.PacketId
 }
 
-func NewFactory(boardToPackets map[abstraction.TransportTarget][]abstraction.PacketId) *UpdateFactory {
+func NewFactory() *UpdateFactory {
 	trace.Info().Msg("new update factory")
 	factory := &UpdateFactory{
 		count:           make(map[abstraction.PacketId]uint64),
@@ -46,7 +46,6 @@ func NewFactory(boardToPackets map[abstraction.TransportTarget][]abstraction.Pac
 		packetCount:     make(map[abstraction.PacketId]uint),
 		lastPacketCount: make(map[abstraction.PacketId]float64),
 		trace:           trace.With().Str("component", "updateFactory").Logger(),
-		boardToPackets:  boardToPackets,
 	}
 
 	go factory.adjustOrder()

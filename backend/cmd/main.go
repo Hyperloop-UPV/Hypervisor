@@ -13,7 +13,6 @@ import (
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -80,22 +79,11 @@ func main() {
 		trace.Fatal().Err(err).Msg("creating vehicleOrders")
 	}
 
-	// <-- lookup tables -->
-	idToBoard, ipToBoardID, boardToPackets := createLookupTables(podData, adj)
-
 	// <--- update factory --->
-	updateFactory := update_factory.NewFactory(boardToPackets)
+	updateFactory := update_factory.NewFactory()
 
 	// <--- logger --->
-	loggerHandler, subloggers := setUpLogger(config)
-
-	// <-- connections & upgrader -->
-	connections := make(chan *websocket.Client)
-	upgrader := websocket.NewUpgrader(connections, trace.Logger)
-
-	// <--- broker --->
-	broker, cleanup := configureBroker(subloggers, loggerHandler, idToBoard, connections)
-	defer cleanup()
+	loggerHandler, _ := setUpLogger(config)
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
@@ -103,11 +91,8 @@ func main() {
 
 	// <--- vehicle --->
 	err = configureVehicle(
-		broker,
 		loggerHandler,
 		updateFactory,
-		ipToBoardID,
-		idToBoard,
 		transp,
 		adj,
 		config,
@@ -129,9 +114,10 @@ func main() {
 		adj,
 		podData,
 		vehicleOrders,
-		upgrader,
 		config,
 	)
+
+	loggerHandler.Start()
 
 	// Open browser tabs
 	openBrowserTabs(config)

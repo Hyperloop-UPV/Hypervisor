@@ -1,21 +1,15 @@
 package main
 
 import (
-	"context"
 	"encoding/binary"
 	"fmt"
-	"net"
-	"time"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/udp"
 	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
@@ -45,124 +39,8 @@ func configureTransport(
 		transp.SetTargetIp(adj.Info.Addresses[board.Name], abstraction.TransportTarget(board.Name))
 	}
 
-	// If BLCU is configured set BLCU packet ID mappings
-	if common.Contains(config.Vehicle.Boards, "BLCU") {
-		configureBLCUTransport(adj, transp, config)
-	}
-
-	// Start handling TCP CLIENT connections
-	configureTCPClientTransport(adj, podData, transp, config)
-
-	// Start handling TCP SERVER connections
-	configureTCPServerTransport(adj, transp)
-
 	// Start handling network packets using UDP server
 	configureUDPServerTransport(adj, transp)
-
-}
-
-// configureBLCUTransport sets the packet IDs and target IP for the BLCU board.
-// It prefers values from config, falls back to ADJ and finally to a loopback default.
-func configureBLCUTransport(adj adj_module.ADJ,
-	transp *transport.Transport,
-	config config.Config) {
-	// Use configurable packet IDs or defaults
-	downloadOrderID := config.Blcu.DownloadOrderId
-	uploadOrderID := config.Blcu.UploadOrderId
-	if downloadOrderID == 0 {
-		downloadOrderID = boards.DefaultBlcuDownloadOrderId
-	}
-	if uploadOrderID == 0 {
-		uploadOrderID = boards.DefaultBlcuUploadOrderId
-	}
-
-	transp.SetIdTarget(abstraction.PacketId(downloadOrderID), abstraction.TransportTarget("BLCU"))
-	transp.SetIdTarget(abstraction.PacketId(uploadOrderID), abstraction.TransportTarget("BLCU"))
-
-	// Use BLCU address from config, ADJ, or default
-	blcuIP := config.Blcu.IP
-	if blcuIP == "" {
-		if adjBlcuIP, exists := adj.Info.Addresses[BLCU]; exists {
-			blcuIP = adjBlcuIP
-		} else {
-			blcuIP = "127.0.0.1"
-		}
-	}
-	transp.SetTargetIp(blcuIP, abstraction.TransportTarget("BLCU"))
-}
-
-func configureTCPClientTransport(
-	adj adj_module.ADJ,
-	podData pod_data.PodData,
-	transp *transport.Transport,
-	config config.Config) {
-
-	// counter used to allocate incremental local ports for multiple clients
-	i := 0 // count
-
-	// map of remote server addresses to transport targets for boards not present in vehicle config
-	serverTargets := make(map[string]abstraction.TransportTarget)
-	for _, board := range podData.Boards {
-		if !common.Contains(config.Vehicle.Boards, board.Name) {
-			serverTargets[fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpClient])] = abstraction.TransportTarget(board.Name)
-			continue
-		}
-		backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpClient]+uint16(i)))
-		if err != nil {
-			panic("Failed to resolve local backend TCP client address")
-		}
-		// Create TCP client config with custom parameters from config
-		clientConfig := tcp.NewClientConfig(backendTcpClientAddr)
-
-		// Apply configurations
-		// Apply custom timeout if specified
-		if config.TCP.ConnectionTimeout > 0 {
-			clientConfig.Timeout = time.Duration(config.TCP.ConnectionTimeout) * time.Millisecond
-		}
-
-		// Apply custom keep-alive if specified
-		if config.TCP.KeepAlive > 0 {
-			clientConfig.KeepAlive = time.Duration(config.TCP.KeepAlive) * time.Millisecond
-		}
-
-		// Apply custom backoff parameters
-		if config.TCP.BackoffMinMs > 0 || config.TCP.BackoffMaxMs > 0 || config.TCP.BackoffMultiplier > 0 {
-			minBackoff := 100 * time.Millisecond // default
-			maxBackoff := 5 * time.Second        // default
-			multiplier := 1.5                    // default
-
-			if config.TCP.BackoffMinMs > 0 {
-				minBackoff = time.Duration(config.TCP.BackoffMinMs) * time.Millisecond
-			}
-			if config.TCP.BackoffMaxMs > 0 {
-				maxBackoff = time.Duration(config.TCP.BackoffMaxMs) * time.Millisecond
-			}
-			if config.TCP.BackoffMultiplier > 0 {
-				multiplier = config.TCP.BackoffMultiplier
-			}
-
-			clientConfig.ConnectionBackoffFunction = tcp.NewExponentialBackoff(minBackoff, multiplier, maxBackoff)
-		}
-
-		// Apply max retries (0 or negative means infinite)
-		clientConfig.MaxConnectionRetries = config.TCP.MaxRetries
-
-		go transp.HandleClient(clientConfig, fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpServer]))
-		i++
-	}
-}
-
-// configureTCPServerTransport starts the TCP server handler using a ListenConfig with KeepAlive.
-func configureTCPServerTransport(
-	adj adj_module.ADJ,
-	transp *transport.Transport,
-) {
-	go transp.HandleServer(tcp.ServerConfig{
-		ListenConfig: net.ListenConfig{
-			KeepAlive: time.Second,
-		},
-		Context: context.TODO(),
-	}, fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpServer]))
 
 }
 

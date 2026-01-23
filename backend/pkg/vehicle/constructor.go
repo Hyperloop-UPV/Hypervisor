@@ -16,36 +16,8 @@ func New(baseLogger zerolog.Logger) Vehicle {
 		ErrorSampler: zerolog.RandomSampler(1),
 	})
 	return Vehicle{
-		boards: make(map[abstraction.BoardId]abstraction.Board),
-		trace:  logger,
+		trace: logger,
 	}
-}
-
-// SetBroker sets the Vehicle Broker to the provided one
-func (vehicle *Vehicle) SetBroker(broker abstraction.Broker) {
-	broker.SetAPI(vehicle)
-	vehicle.broker = broker
-	vehicle.trace.Info().Type("broker", broker).Msg("set broker")
-}
-
-// AddBoard adds a Board to the Vehicle
-func (vehicle *Vehicle) AddBoard(board abstraction.Board) {
-	board.SetAPI(vehicle)
-	vehicle.boards[board.Id()] = board
-	vehicle.trace.Info().Type("board", board).Uint16("id", uint16(board.Id())).Msg("add board logic")
-}
-
-// RemoveBoard removes a Board from the Vehicle
-func (vehicle *Vehicle) RemoveBoard(board abstraction.Board) {
-	delete(vehicle.boards, board.Id())
-	vehicle.trace.Info().Type("board", board).Uint16("id", uint16(board.Id())).Msg("remove board logic")
-}
-
-// RemoveBoardId removes a Board from the Vehicle based on its ID
-func (vehicle *Vehicle) RemoveBoardId(id abstraction.BoardId) {
-	delete(vehicle.boards, id)
-	vehicle.trace.Info().Uint16("id", uint16(id)).Msg("remove board logic")
-
 }
 
 // SetTransport sets the Vehicle Transport to the provided one
@@ -69,14 +41,4 @@ func (vehicle *Vehicle) SetUpdateFactory(updateFactory *update_factory.UpdateFac
 func (vehicle *Vehicle) SetIdToBoardName(idToBoardName map[abstraction.PacketId]string) {
 	vehicle.idToBoardName = idToBoardName
 	vehicle.trace.Info().Msg("set id to board")
-}
-
-func (vehicle *Vehicle) SetIpToBoardId(ipToBoardId map[string]abstraction.BoardId) {
-	vehicle.ipToBoardId = ipToBoardId
-	vehicle.trace.Info().Msg("set ip to board id")
-}
-
-func (vehicle *Vehicle) SetBlcuId(id abstraction.BoardId) {
-	vehicle.BlcuId = id
-	vehicle.trace.Info().Uint16("blcu_id", uint16(id)).Msg("set blcu id")
 }

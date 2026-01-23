@@ -34,7 +34,7 @@ var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \
 var traceFile = flag.String("log", "", "set the trace log file")
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 123")
-var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
+
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
 var versionFlag = flag.Bool("version", false, "Show the backend version")
@@ -132,12 +132,6 @@ func main() {
 		upgrader,
 		config,
 	)
-
-	// <--- SNTP --->
-	terminate := configureSNTP(adj)
-	if terminate {
-		os.Exit(1)
-	}
 
 	// Open browser tabs
 	openBrowserTabs(config)

@@ -126,7 +126,3 @@ func main() {
 	<-interrupt
 	trace.Info().Msg("shutting down backend")
 }
-
-// <-- Hall of Fame -->
-// H09 -- Zürich    -- PM Juan Martínez, Marc Sanchis -- Winners
-// H10 -- Groningen -- PM Marc Sanchis, Joan Física   -- 3rd Place

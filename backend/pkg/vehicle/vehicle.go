@@ -1,8 +1,6 @@
 package vehicle
 
 import (
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
-
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/rs/zerolog"
@@ -22,12 +20,5 @@ type Vehicle struct {
 }
 
 func (vehicle *Vehicle) notifyError(name string, err error) {
-	packet := protection.NewPacket(1666, protection.FaultSeverity)
-	packet.Kind = protection.ErrorHandlerKind
-	packet.Name = name
-	packet.Timestamp = protection.NowTimestamp()
-	packet.Type = protection.IntType
-	packet.Data = &protection.ErrorHandler{
-		Error: err.Error(),
-	}
+	vehicle.trace.Warn().Type("Notification Error", name).Err(err).Msg("notification error")
 }

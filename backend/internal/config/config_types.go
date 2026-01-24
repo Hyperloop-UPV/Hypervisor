@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/server"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 )
 
@@ -52,7 +51,6 @@ type Logging struct {
 
 type Config struct {
 	App       App
-	Vehicle   vehicle.Config
 	Server    server.Config
 	Adj       Adj
 	Network   Network

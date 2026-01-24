@@ -12,7 +12,6 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/udp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	trace "github.com/rs/zerolog/log"
 )
@@ -57,7 +56,6 @@ func configureUDPServerTransport(
 }
 
 // getTransportDecEnc builds presentation decoder/encoder based on podData descriptors.
-// Registers data decoders/encoders per packet and special decoders for BLCU ack, state orders and protection.
 func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presentation.Decoder, *presentation.Encoder) {
 	decoder := presentation.NewDecoder(binary.LittleEndian, trace.Logger)
 	encoder := presentation.NewEncoder(binary.LittleEndian, trace.Logger)
@@ -121,29 +119,6 @@ func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presen
 	for _, id := range ids {
 		decoder.SetPacketDecoder(id, dataDecoder)
 		encoder.SetPacketEncoder(id, dataEncoder)
-	}
-
-	// Protection: configure severity mapping for known codes, then assign the protection decoder
-	// to all protection-related packet IDs.
-	protectionDecoder := protection.NewDecoder(binary.LittleEndian)
-	protectionDecoder.SetSeverity(1000, protection.FaultSeverity).SetSeverity(2000, protection.WarningSeverity).SetSeverity(3000, protection.OkSeverity)
-	protectionDecoder.SetSeverity(1111, protection.FaultSeverity).SetSeverity(2111, protection.WarningSeverity).SetSeverity(3111, protection.OkSeverity)
-	protectionDecoder.SetSeverity(1222, protection.FaultSeverity).SetSeverity(2222, protection.WarningSeverity).SetSeverity(3222, protection.OkSeverity)
-	protectionDecoder.SetSeverity(1333, protection.FaultSeverity)
-	protectionDecoder.SetSeverity(1444, protection.FaultSeverity)
-	protectionDecoder.SetSeverity(1555, protection.FaultSeverity).SetSeverity(2555, protection.WarningSeverity)
-	protectionDecoder.SetSeverity(1666, protection.FaultSeverity).SetSeverity(2666, protection.WarningSeverity).SetSeverity(3666, protection.OkSeverity)
-
-	// Set protection decoder for all protection packet IDs
-	packetIDs := []abstraction.PacketId{
-		1000, 1111, 1222, 1333,
-		1444, 1555, 1666, 2000,
-		2111, 2222, 2555, 2666,
-		3000, 3111, 3222, 3666,
-	}
-
-	for _, id := range packetIDs {
-		decoder.SetPacketDecoder(id, protectionDecoder)
 	}
 
 	return decoder, encoder

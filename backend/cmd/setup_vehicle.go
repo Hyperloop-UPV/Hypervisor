@@ -37,7 +37,6 @@ func configureVehicle(
 }
 
 func configureHttpServer(
-	adj adj_module.ADJ,
 	podData pod_data.PodData,
 	config config.Config) {
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))

@@ -94,7 +94,6 @@ func main() {
 
 	// <--- http server --->
 	configureHttpServer(
-		adj,
 		podData,
 		config,
 	)

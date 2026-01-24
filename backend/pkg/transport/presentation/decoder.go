@@ -6,9 +6,7 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
+
 	"github.com/rs/zerolog"
 )
 
@@ -19,9 +17,6 @@ type PacketDecoder interface {
 
 // Type assertions to check packet decoders follows the Decoder interface
 var _ PacketDecoder = &data.Decoder{}
-var _ PacketDecoder = &order.Decoder{}
-var _ PacketDecoder = &protection.Decoder{}
-var _ PacketDecoder = &state.Decoder{}
 
 // Decoder is the root decoder, it takes the id of the packet and decodes the rest of it
 type Decoder struct {

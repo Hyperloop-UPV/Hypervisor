@@ -36,9 +36,15 @@ func configureTransport(
 		transp.SetTargetIp(adj.Info.Addresses[board.Name], abstraction.TransportTarget(board.Name))
 	}
 
-	// Start handling network packets using UDP server
-	configureUDPServerTransport(adj, transp)
+	// Check development mode
+	if !config.Network.DevMode {
+		trace.Warn().Msg("Development mode enabled: Using sniffer with no BPF filter")
+		configureSnifferTransport(adj, transp, config)
 
+	} else {
+		// Start handling network packets using UDP server
+		configureUDPServerTransport(adj, transp)
+	}
 }
 
 // configureUDPServerTransport creates and starts the UDP server then delegates handling to transport.

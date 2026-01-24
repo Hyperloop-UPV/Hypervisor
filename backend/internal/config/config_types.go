@@ -22,5 +22,10 @@ type Config struct {
 	App     App
 	Server  server.Config
 	Adj     Adj
+	Network Network
 	Logging Logging
+}
+
+type Network struct {
+	DevMode bool `toml:"dev_mode"`
 }

@@ -41,6 +41,8 @@ func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNo
 		var err error
 		//update := vehicle.updateFactory.NewUpdate(p)
 
+		fmt.Printf("XOCOLATEEEEEEEE")
+
 		// TODO: SEND TO FRONTEND
 		// if err != nil {
 		// 	vehicle.trace.Error().Stack().Err(err).Msg("broker push")

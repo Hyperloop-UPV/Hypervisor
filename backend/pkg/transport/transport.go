@@ -90,8 +90,6 @@ func (transport *Transport) handleUDPPacket(udpPacket udp.Packet) {
 
 	pre := NewPacketNotification(packet, srcAddr, dstAddr, udpPacket.Timestamp)
 
-	fmt.Printf("XOCOLATEEEEEEEE")
-
 	// Send notification
 	transport.api.Notification(pre)
 }

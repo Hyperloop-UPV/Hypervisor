@@ -35,8 +35,6 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNotification) error {
 	var to string
 
-	fmt.Printf("Packet Notification: %+v\n", notification)
-
 	switch p := notification.Packet.(type) {
 	case *data.Packet:
 

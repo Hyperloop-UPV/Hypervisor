@@ -20,8 +20,6 @@ type TransportMessage interface {
 // Transport is the module in charge of handling communication specifics with the
 // vehicle
 type Transport interface {
-	// SendMessage sends the provided message to the vehicle
-	SendMessage(TransportMessage) error
 
 	// SetAPI sets the API the Transport must use to communicate with the rest of the back-end
 	// through the Vehicle. It should avoid using any other means

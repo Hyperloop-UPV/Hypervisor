@@ -5,11 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
@@ -41,29 +39,15 @@ func configureVehicle(
 func configureHttpServer(
 	adj adj_module.ADJ,
 	podData pod_data.PodData,
-	vehicleOrders vehicle_models.VehicleOrders,
 	config config.Config) {
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error creating podData handler: %v\n", err)
 	}
-	orderDataHandle, err := h.HandleDataJSON("orderData.json", vehicleOrders)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error creating orderData handler: %v\n", err)
-	}
-	uploadableBords := common.Filter(common.Keys(adj.Info.Addresses), func(item string) bool {
-		return item != adj.Info.Addresses[BLCU]
-	})
-	programableBoardsHandle, err := h.HandleDataJSON("programableBoards.json", uploadableBords)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error creating programableBoards handler: %v\n", err)
-	}
 
 	for _, server := range config.Server {
 		mux := h.NewMux(
 			h.Endpoint("/backend"+server.Endpoints.PodData, podDataHandle),
-			h.Endpoint("/backend"+server.Endpoints.OrderData, orderDataHandle),
-			h.Endpoint("/backend"+server.Endpoints.ProgramableBoards, programableBoardsHandle),
 			h.Endpoint(server.Endpoints.Files, h.HandleStatic(server.StaticPath)),
 		)
 

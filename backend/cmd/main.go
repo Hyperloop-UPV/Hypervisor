@@ -10,22 +10,14 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
-	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	trace "github.com/rs/zerolog/log"
 )
 
 const (
-	BACKEND          = "backend"
-	BLCU             = "BLCU"
-	TcpClient        = "TCP_CLIENT"
-	TcpServer        = "TCP_SERVER"
-	UDP              = "UDP"
-	SNTP             = "SNTP"
-	BlcuAck          = "blcu_ack"
-	AddStateOrder    = "add_state_order"
-	RemoveStateOrder = "remove_state_order"
+	BACKEND = "backend"
+	UDP     = "UDP"
 )
 
 var configFile = flag.String("config", "config.toml", "path to configuration file")
@@ -71,12 +63,6 @@ func main() {
 		trace.Fatal().Err(err).Msg("creating podData")
 	}
 
-	// <--- vehicle orders --->
-	vehicleOrders, err := vehicle_models.NewVehicleOrders(podData.Boards, adj.Info.Addresses[BLCU])
-	if err != nil {
-		trace.Fatal().Err(err).Msg("creating vehicleOrders")
-	}
-
 	// <--- update factory --->
 	updateFactory := update_factory.NewFactory()
 
@@ -85,7 +71,6 @@ func main() {
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
-	transp.SetpropagateFault(config.Transport.PropagateFault)
 
 	// <--- vehicle --->
 	err = configureVehicle(
@@ -111,7 +96,6 @@ func main() {
 	configureHttpServer(
 		adj,
 		podData,
-		vehicleOrders,
 		config,
 	)
 

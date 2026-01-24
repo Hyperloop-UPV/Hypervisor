@@ -21,12 +21,6 @@ type Vehicle struct {
 	trace zerolog.Logger
 }
 
-// SendMessage is the method invoked by a board to send a message
-func (vehicle *Vehicle) SendMessage(msg abstraction.TransportMessage) error {
-	err := vehicle.transport.SendMessage(msg)
-	return err
-}
-
 func (vehicle *Vehicle) notifyError(name string, err error) {
 	packet := protection.NewPacket(1666, protection.FaultSeverity)
 	packet.Kind = protection.ErrorHandlerKind

@@ -11,9 +11,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/udp"
-	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	trace "github.com/rs/zerolog/log"
@@ -124,16 +122,6 @@ func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presen
 		decoder.SetPacketDecoder(id, dataDecoder)
 		encoder.SetPacketEncoder(id, dataEncoder)
 	}
-
-	// Register BLCU ack decoder
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds[BlcuAck]), blcu_packet.NewDecoder())
-
-	// TODO Solve this foking mess, I have tried...
-	stateOrdersDecoder := order.NewDecoder(binary.LittleEndian)
-	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds[AddStateOrder]), stateOrdersDecoder.DecodeAdd)
-	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds[RemoveStateOrder]), stateOrdersDecoder.DecodeRemove)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds[AddStateOrder]), stateOrdersDecoder)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds[RemoveStateOrder]), stateOrdersDecoder)
 
 	// Protection: configure severity mapping for known codes, then assign the protection decoder
 	// to all protection-related packet IDs.

@@ -7,13 +7,9 @@ import (
 	"runtime/pprof"
 	"strings"
 
-	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
-	"github.com/pkg/browser"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -61,61 +57,6 @@ func setupRuntimeCPU() func() {
 	return cleanup
 }
 
-// createPacketIDToBoard builds a lookup table that maps each PacketId
-// to the name of the board that produced it.
-func createPacketIDToBoard(
-	podData pod_data.PodData,
-) map[abstraction.PacketId]string {
-
-	idToBoard := make(map[abstraction.PacketId]string)
-
-	for _, board := range podData.Boards {
-		for _, packet := range board.Packets {
-			idToBoard[packet.Id] = board.Name
-		}
-	}
-
-	return idToBoard
-}
-
-// createBoardToPackets builds a lookup table that maps each board
-// to the list of PacketIds it produces.
-func createBoardToPackets(
-	podData pod_data.PodData,
-) map[abstraction.TransportTarget][]abstraction.PacketId {
-
-	boardToPackets := make(map[abstraction.TransportTarget][]abstraction.PacketId)
-
-	for _, board := range podData.Boards {
-		packetIds := make([]abstraction.PacketId, len(board.Packets))
-		for i, packet := range board.Packets {
-			packetIds[i] = packet.Id
-		}
-		boardToPackets[abstraction.TransportTarget(board.Name)] = packetIds
-	}
-
-	return boardToPackets
-}
-
-// createLookupTables builds all lookup tables required by the broker
-// and related components.
-//
-// It returns:
-//  1. PacketId -> board name
-//  2. IP address -> BoardId
-//  3. board -> PacketIds
-func createLookupTables(
-	podData pod_data.PodData,
-	adj adj_module.ADJ,
-) (
-	map[abstraction.PacketId]string,
-	map[abstraction.TransportTarget][]abstraction.PacketId,
-) {
-
-	return createPacketIDToBoard(podData),
-		createBoardToPackets(podData)
-}
-
 func setUpLogger(config config.Config) (*logger.Logger, SubloggersMap) {
 
 	var subloggers = SubloggersMap{
@@ -127,17 +68,4 @@ func setUpLogger(config config.Config) (*logger.Logger, SubloggersMap) {
 
 	return loggerHandler, subloggers
 
-}
-
-func openBrowserTabs(config config.Config) {
-
-	switch config.App.AutomaticWindowOpening {
-	case "ethernet-view":
-		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
-	case "control-station":
-		browser.OpenURL("http://" + config.Server["control-station"].Addr)
-	case "both":
-		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
-		browser.OpenURL("http://" + config.Server["control-station"].Addr)
-	}
 }

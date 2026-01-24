@@ -32,10 +32,8 @@ var configFile = flag.String("config", "config.toml", "path to configuration fil
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "", "set the trace log file")
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 123")
 
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
-var playbackFile = flag.String("playback", "", "")
 var versionFlag = flag.Bool("version", false, "Show the backend version")
 
 type SubloggersMap map[abstraction.LoggerName]abstraction.Logger
@@ -117,10 +115,8 @@ func main() {
 		config,
 	)
 
+	// Start loggers
 	loggerHandler.Start()
-
-	// Open browser tabs
-	openBrowserTabs(config)
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)

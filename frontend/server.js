@@ -43,6 +43,8 @@ const addMeasurement = (measurementId, boardId, displayUnits) => {
   measurementDefs.push({ measurementId, boardId, displayUnits })
 }
 
+const measurementKey = (measurementId, boardId) => `${boardId}:${measurementId}`
+
 for (let i = 1; i <= 8; i += 1) {
   addMeasurement(`lcu_airgap_${i}`, 4, "mm")
 }
@@ -52,6 +54,8 @@ for (let i = 1; i <= 10; i += 1) {
 
 addMeasurement("voltage_reading", 1, "V")
 addMeasurement("current_reading", 1, "A")
+addMeasurement("voltage_reading", 4, "V")
+addMeasurement("current_reading", 4, "A")
 addMeasurement("batteries_voltage_reading", 1, "V")
 addMeasurement("voltage_min", 1, "V")
 addMeasurement("voltage_max", 1, "V")
@@ -71,12 +75,12 @@ measurementDefs.forEach((def, index) => {
     measurement_id: def.measurementId,
     board_id: def.boardId,
     display_units: def.displayUnits,
-    value: -1,
+    value: "-1",
   }
 })
 
 const measurementKeyById = new Map(
-  measurementDefs.map((def) => [def.measurementId, def.key]),
+  measurementDefs.map((def) => [measurementKey(def.measurementId, def.boardId), def.key]),
 )
 
 const generateMeasurementValues = () => {
@@ -108,30 +112,50 @@ const generateMeasurementValues = () => {
       )
       cellVoltages.push(voltage)
       allCellVoltages.push(voltage)
-      valuesByMeasurement.set(`battery${packId}_cell${cellIndex + 1}`, voltage)
+      valuesByMeasurement.set(
+        measurementKey(`battery${packId}_cell${cellIndex + 1}`, 1),
+        voltage,
+      )
     }
 
     const packVoltage = cellVoltages.reduce((sum, value) => sum + value, 0)
     totalBatteryVoltage += packVoltage
-    valuesByMeasurement.set(`battery${packId}_total_voltage`, Number(packVoltage.toFixed(2)))
+    valuesByMeasurement.set(
+      measurementKey(`battery${packId}_total_voltage`, 1),
+      Number(packVoltage.toFixed(2)),
+    )
   }
 
-  valuesByMeasurement.set("batteries_voltage_reading", Number(totalBatteryVoltage.toFixed(2)))
-  valuesByMeasurement.set("voltage_reading", Number(dcBusVoltage.toFixed(2)))
-  valuesByMeasurement.set("current_reading", Number(levitationCurrent.toFixed(1)))
-  valuesByMeasurement.set("voltage_min", allCellVoltages.length ? Math.min(...allCellVoltages) : null)
-  valuesByMeasurement.set("voltage_max", allCellVoltages.length ? Math.max(...allCellVoltages) : null)
+  valuesByMeasurement.set(
+    measurementKey("batteries_voltage_reading", 1),
+    Number(totalBatteryVoltage.toFixed(2)),
+  )
+  valuesByMeasurement.set(measurementKey("voltage_reading", 1), Number(dcBusVoltage.toFixed(2)))
+  valuesByMeasurement.set(measurementKey("current_reading", 1), Number(levitationCurrent.toFixed(1)))
+  valuesByMeasurement.set(measurementKey("voltage_reading", 4), Number((dcBusVoltage + 2).toFixed(2)))
+  valuesByMeasurement.set(
+    measurementKey("current_reading", 4),
+    Number((levitationCurrent + 3).toFixed(1)),
+  )
+  valuesByMeasurement.set(
+    measurementKey("voltage_min", 1),
+    allCellVoltages.length ? Math.min(...allCellVoltages) : null,
+  )
+  valuesByMeasurement.set(
+    measurementKey("voltage_max", 1),
+    allCellVoltages.length ? Math.max(...allCellVoltages) : null,
+  )
 
   for (let i = 1; i <= 8; i += 1) {
     valuesByMeasurement.set(
-      `lcu_airgap_${i}`,
+      measurementKey(`lcu_airgap_${i}`, 4),
       Number((levitationDistance + rand(-0.4, 0.4)).toFixed(2)),
     )
   }
 
   for (let i = 1; i <= 10; i += 1) {
     valuesByMeasurement.set(
-      `lcu_coil_current_${i}`,
+      measurementKey(`lcu_coil_current_${i}`, 4),
       Number((levitationCurrent + rand(-4, 4)).toFixed(1)),
     )
   }
@@ -152,10 +176,10 @@ const broadcastTelemetry = () => {
   const valuesByMeasurement = generateMeasurementValues()
   const updates = {}
 
-  valuesByMeasurement.forEach((value, measurementId) => {
-    const key = measurementKeyById.get(measurementId)
+  valuesByMeasurement.forEach((value, measurementKeyValue) => {
+    const key = measurementKeyById.get(measurementKeyValue)
     if (!key) return
-    updates[key] = value
+    updates[key] = value === null || value === undefined ? null : String(value)
   })
 
   sendPayload(updates)

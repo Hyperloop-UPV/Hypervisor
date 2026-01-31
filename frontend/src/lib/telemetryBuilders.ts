@@ -26,6 +26,8 @@ const lcuCoilCurrentKeys = [
 
 const PACK_COUNT = 18
 const CELLS_PER_PACK = 6
+const BOARD_LCU = 4
+const BOARD_HVSCU = 1
 
 const mean = (values: Array<number | null | undefined>) => {
   const clean = values.filter((value) => typeof value === "number") as number[]
@@ -33,12 +35,12 @@ const mean = (values: Array<number | null | undefined>) => {
   return clean.reduce((sum, value) => sum + value, 0) / clean.length
 }
 
-export const buildLevitation = (getValue: (measurementId: string) => number | null) => {
-  const levitationDistance = mean(lcuAirgapKeys.map((key) => getValue(key)))
-  const levitationCurrent = mean(lcuCoilCurrentKeys.map((key) => getValue(key)))
+export const buildLevitation = (getValue: (measurementId: string, boardId: number) => number | null) => {
+  const levitationDistance = mean(lcuAirgapKeys.map((key) => getValue(key, BOARD_LCU)))
+  const levitationCurrent = mean(lcuCoilCurrentKeys.map((key) => getValue(key, BOARD_LCU)))
 
-  const voltageReading = getValue("voltage_reading")
-  const currentReading = getValue("current_reading")
+  const voltageReading = getValue("voltage_reading", BOARD_HVSCU)
+  const currentReading = getValue("current_reading", BOARD_HVSCU)
   const levitationPower =
     typeof voltageReading === "number" && typeof currentReading === "number"
       ? voltageReading * currentReading
@@ -54,7 +56,7 @@ export const buildLevitation = (getValue: (measurementId: string) => number | nu
   }
 }
 
-export const buildBatteryData = (getValue: (measurementId: string) => number | null) => {
+export const buildBatteryData = (getValue: (measurementId: string, boardId: number) => number | null) => {
   const hvbms: TelemetryData["hvbms"] = []
 
   for (let packId = 1; packId <= PACK_COUNT; packId += 1) {
@@ -63,12 +65,12 @@ export const buildBatteryData = (getValue: (measurementId: string) => number | n
       const cellId = index + 1
       return {
         id: cellId,
-        voltage: getValue(`${prefix}cell${cellId}`),
+        voltage: getValue(`${prefix}cell${cellId}`, BOARD_HVSCU),
         temp: null,
       }
     })
     const hasCellData = cells.some((cell) => typeof cell.voltage === "number")
-    const packVoltage = getValue(`${prefix}total_voltage`)
+    const packVoltage = getValue(`${prefix}total_voltage`, BOARD_HVSCU)
     if (!hasCellData && typeof packVoltage !== "number") continue
     hvbms.push({
       id: packId,
@@ -79,6 +81,6 @@ export const buildBatteryData = (getValue: (measurementId: string) => number | n
 
   return {
     hvbms,
-    totalBatteryVoltage: getValue("batteries_voltage_reading"),
+    totalBatteryVoltage: getValue("batteries_voltage_reading", BOARD_HVSCU),
   }
 }

@@ -1,87 +1,164 @@
-import { WebSocketServer } from "ws"
+import http from "node:http"
 
-const wss = new WebSocketServer({ port: 8080 })
-console.log("WebSocket server started on ws://localhost:8080")
+const sseClients = new Set()
+const port = 8080
+const server = http.createServer((req, res) => {
+  if (req.method === "GET" && req.url === "/telemetry") {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "Access-Control-Allow-Origin": "*",
+    })
+    res.write("retry: 1000\n\n")
+    sseClients.add(res)
+    res.write(`data: ${JSON.stringify(measurementDictionary)}\n\n`)
+
+    req.on("close", () => {
+      sseClients.delete(res)
+    })
+    return
+  }
+
+  res.writeHead(200, { "Content-Type": "text/plain", "Access-Control-Allow-Origin": "*" })
+  res.end("ok")
+})
+
+server.listen(port, () => {
+  console.log(`SSE server started on http://localhost:${port}/telemetry`)
+})
 
 const startTime = Date.now()
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 const rand = (min, max) => min + Math.random() * (max - min)
 
-const baseCellVoltages = Array.from({ length: 96 }, () => rand(4.08, 4.15))
-const baseCellTemps = Array.from({ length: 96 }, () => rand(28, 34))
+const packCount = 18
+const cellsPerPack = 6
+const totalCells = packCount * cellsPerPack
+const baseCellVoltages = Array.from({ length: totalCells }, () => rand(4.08, 4.15))
+const baseCellTemps = Array.from({ length: totalCells }, () => rand(28, 34))
 
-const generateTelemetry = () => {
+const measurementDefs = []
+const addMeasurement = (measurementId, boardId, displayUnits) => {
+  measurementDefs.push({ measurementId, boardId, displayUnits })
+}
+
+for (let i = 1; i <= 8; i += 1) {
+  addMeasurement(`lcu_airgap_${i}`, 4, "mm")
+}
+for (let i = 1; i <= 10; i += 1) {
+  addMeasurement(`lcu_coil_current_${i}`, 4, "A")
+}
+
+addMeasurement("voltage_reading", 1, "V")
+addMeasurement("current_reading", 1, "A")
+addMeasurement("batteries_voltage_reading", 1, "V")
+addMeasurement("voltage_min", 1, "V")
+addMeasurement("voltage_max", 1, "V")
+
+for (let pack = 1; pack <= packCount; pack += 1) {
+  for (let cell = 1; cell <= cellsPerPack; cell += 1) {
+    addMeasurement(`battery${pack}_cell${cell}`, 1, "V")
+  }
+  addMeasurement(`battery${pack}_total_voltage`, 1, "V")
+}
+
+const measurementDictionary = {}
+measurementDefs.forEach((def, index) => {
+  const key = String(index + 1)
+  def.key = key
+  measurementDictionary[key] = {
+    measurement_id: def.measurementId,
+    board_id: def.boardId,
+    display_units: def.displayUnits,
+    value: -1,
+  }
+})
+
+const measurementKeyById = new Map(
+  measurementDefs.map((def) => [def.measurementId, def.key]),
+)
+
+const generateMeasurementValues = () => {
   const elapsed = (Date.now() - startTime) / 1000
   const prechargeTarget = 380 + Math.sin(elapsed / 18) * 5
   const prechargeCurve = 1 - Math.exp(-elapsed / 12)
   const dcBusVoltage = clamp(prechargeTarget * prechargeCurve + rand(-1.5, 1.5), 0, 420)
 
-  const totalBatteryVoltage = clamp(400 + Math.sin(elapsed / 15) * 3 + rand(-1, 1), 360, 420)
-
   const levitationDistance = clamp(12 + Math.sin(elapsed / 4) * 0.6 + rand(-0.1, 0.1), 10, 14)
   const levitationCurrent = clamp(85 + Math.sin(elapsed / 3) * 8 + rand(-2, 2), 60, 110)
-  const levitationPower = clamp(levitationCurrent * 2.6 + rand(-15, 15), 120, 350)
 
-  const cells = baseCellVoltages.map((base, index) => ({
-    id: index + 1,
-    voltage: Number((base + Math.sin(elapsed / 10 + index / 7) * 0.015 + rand(-0.01, 0.01)).toFixed(3)),
-    temp: Number((baseCellTemps[index] + Math.sin(elapsed / 8 + index / 12) * 0.6).toFixed(1)),
-  }))
+  const valuesByMeasurement = new Map()
+  const allCellVoltages = []
+  let totalBatteryVoltage = 0
 
-  const packs = [
-    {
-      id: 1,
-      voltage: Number((totalBatteryVoltage / 2 + rand(-1.2, 1.2)).toFixed(1)),
-      cells: cells.slice(0, 48),
-    },
-    {
-      id: 2,
-      voltage: Number((totalBatteryVoltage / 2 + rand(-1.2, 1.2)).toFixed(1)),
-      cells: cells.slice(48, 96),
-    },
-  ]
+  for (let packIndex = 0; packIndex < packCount; packIndex += 1) {
+    const packId = packIndex + 1
+    const offset = packIndex * cellsPerPack
+    const cellVoltages = []
 
-  return {
-    hvbms: packs,
-    lvbms: {
-      id: 0,
-      voltage: Number((24 + Math.sin(elapsed / 9) * 0.4 + rand(-0.2, 0.2)).toFixed(2)),
-      cells: [
-        { id: 1, temp: Number((28 + rand(-1, 1)).toFixed(1)) },
-        { id: 2, temp: Number((28 + rand(-1, 1)).toFixed(1)) },
-      ],
-    },
-    propulsion: {
-      speed: Number((40 + Math.sin(elapsed / 2.8) * 15 + rand(-2, 2)).toFixed(1)),
-      acceleration: Math.sin(elapsed / 5) > 0,
-      braking: Math.sin(elapsed / 7) < -0.6,
-    },
-    levitation: {
-      verticalGap: Number(levitationDistance.toFixed(2)),
-      current: Number(levitationCurrent.toFixed(1)),
-      power: Number(levitationPower.toFixed(1)),
-      lateralOffset: Number((Math.sin(elapsed / 6) * 0.4).toFixed(3)),
-      verticalAccel: Number((Math.sin(elapsed / 3) * 0.3).toFixed(2)),
-      lateralAccel: Number((Math.cos(elapsed / 4) * 0.2).toFixed(2)),
-      magnetTemp: Number((42 + Math.sin(elapsed / 10) * 2 + rand(-0.5, 0.5)).toFixed(1)),
-    },
-    cameras: {
-      activeFeeds: 2,
-      recording: true,
-    },
-    dcBusVoltage,
+    for (let cellIndex = 0; cellIndex < cellsPerPack; cellIndex += 1) {
+      const idx = offset + cellIndex
+      const voltage = Number(
+        (
+          baseCellVoltages[idx] +
+          Math.sin(elapsed / 10 + idx / 7) * 0.015 +
+          rand(-0.01, 0.01)
+        ).toFixed(3),
+      )
+      cellVoltages.push(voltage)
+      allCellVoltages.push(voltage)
+      valuesByMeasurement.set(`battery${packId}_cell${cellIndex + 1}`, voltage)
+    }
+
+    const packVoltage = cellVoltages.reduce((sum, value) => sum + value, 0)
+    totalBatteryVoltage += packVoltage
+    valuesByMeasurement.set(`battery${packId}_total_voltage`, Number(packVoltage.toFixed(2)))
   }
+
+  valuesByMeasurement.set("batteries_voltage_reading", Number(totalBatteryVoltage.toFixed(2)))
+  valuesByMeasurement.set("voltage_reading", Number(dcBusVoltage.toFixed(2)))
+  valuesByMeasurement.set("current_reading", Number(levitationCurrent.toFixed(1)))
+  valuesByMeasurement.set("voltage_min", allCellVoltages.length ? Math.min(...allCellVoltages) : null)
+  valuesByMeasurement.set("voltage_max", allCellVoltages.length ? Math.max(...allCellVoltages) : null)
+
+  for (let i = 1; i <= 8; i += 1) {
+    valuesByMeasurement.set(
+      `lcu_airgap_${i}`,
+      Number((levitationDistance + rand(-0.4, 0.4)).toFixed(2)),
+    )
+  }
+
+  for (let i = 1; i <= 10; i += 1) {
+    valuesByMeasurement.set(
+      `lcu_coil_current_${i}`,
+      Number((levitationCurrent + rand(-4, 4)).toFixed(1)),
+    )
+  }
+
+  return valuesByMeasurement
 }
 
-const broadcastTelemetry = () => {
-  const payload = JSON.stringify(generateTelemetry())
-  wss.clients.forEach((client) => {
-    if (client.readyState === 1) client.send(payload)
+const sendPayload = (payload) => {
+  if (sseClients.size === 0) return
+  const message = `data: ${JSON.stringify(payload)}\n\n`
+  sseClients.forEach((client) => {
+    client.write(message)
   })
 }
 
-setInterval(broadcastTelemetry, 500)
+const broadcastTelemetry = () => {
+  if (sseClients.size === 0) return
+  const valuesByMeasurement = generateMeasurementValues()
+  const updates = {}
 
-wss.on("connection", () => {
-  console.log("Client connected")
-})
+  valuesByMeasurement.forEach((value, measurementId) => {
+    const key = measurementKeyById.get(measurementId)
+    if (!key) return
+    updates[key] = value
+  })
+
+  sendPayload(updates)
+}
+
+setInterval(broadcastTelemetry, 500)

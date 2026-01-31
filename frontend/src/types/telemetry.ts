@@ -1,42 +1,25 @@
 
 export interface BatteryCell {
-  id: number;
-  temp: number;
+  id?: number;
+  voltage?: number | null;
+  temp?: number | null;
 }
 
 export interface BMSData {
-  id: number;
-  cells : BatteryCell[];
-  voltage: number;
-}
-
-export interface PropulsionData {
-  braking: boolean;
-  acceleration: boolean;
-  speed: number;
-}
-
-
-export interface LevitationData {
-  verticalGap?: number;
-  lateralOffset?: number;
-  verticalAccel?: number;
-  lateralAccel?: number;
-  magnetTemp?: number;
-  current?: number;
-  power?: number;
-}
-
-export interface CamerasData{
-  url: string;
-  status: string;
+  id?: number;
+  cells: BatteryCell[];
+  voltage?: number | null;
 }
 
 export interface TelemetryData {
   hvbms: BMSData[];
-  lvbms: BMSData;
-  propulsion: PropulsionData | any; 
-  levitation: LevitationData | any;
-  cameras: CamerasData | any;
-  dcBusVoltage?: number;
+  lvbms?: BMSData | null;
+  levitation: {
+    verticalGap?: number | null;
+    current?: number | null;
+    power?: number | null;
+  };
+  dcBusVoltage?: number | null;
+  totalBatteryVoltage?: number | null;
+  unitsByMeasurementId?: Record<string, string | null | undefined>;
 }

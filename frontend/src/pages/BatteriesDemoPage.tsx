@@ -1,5 +1,4 @@
 import { useOutletContext } from "react-router-dom"
-import { useMemo } from "react"
 import type { TelemetryOutletContext } from "@/types/app"
 import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries"
 import { formatTime, formatValue } from "@/lib/demoHelpers"
@@ -7,20 +6,6 @@ import { ChartCard } from "@/components/ChartCard"
 import { MetricCard } from "@/components/MetricCard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-const buildPackVoltageStats = (packs: { voltage?: number | null }[]) => {
-  const voltages = packs
-    .map((pack) => pack.voltage)
-    .filter((voltage): voltage is number => typeof voltage === "number")
-  if (voltages.length === 0) {
-    return { min: null, max: null, avg: null }
-  }
-  const total = voltages.reduce((sum, value) => sum + value, 0)
-  return {
-    min: Math.min(...voltages),
-    max: Math.max(...voltages),
-    avg: total / voltages.length,
-  }
-}
 
 const buildCellVoltageStats = (cells: { voltage?: number | null }[]) => {
   const voltages = cells

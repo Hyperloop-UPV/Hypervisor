@@ -21,5 +21,5 @@ export interface TelemetryData {
   };
   dcBusVoltage?: number | null;
   totalBatteryVoltage?: number | null;
-  unitsByMeasurementId?: Record<string, string | null | undefined>;
+  unitsByMeasurementKey?: Record<string, string | null | undefined>;
 }

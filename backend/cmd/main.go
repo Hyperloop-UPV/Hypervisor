@@ -1,17 +1,24 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"flag"
+	"math/rand"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"time"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/worker"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -92,14 +99,48 @@ func main() {
 		config,
 	)
 
+	// Start loggers
+	loggerHandler.Start()
+
+	// Test SSE
+
+	hub := sse.NewHub(trace.Logger)
+	http.Handle("/stream", hub)
+
+	type State struct {
+		Status    string  `json:"status"`
+		Progress  float64 `json:"progress"`
+		Voltage   float64 `json:"voltage"`
+		Current   float64 `json:"current"`
+		Timestamp int64   `json:"timestamp"`
+	}
+
+	randomState := func() State {
+		return State{
+			Status:    "running",
+			Progress:  rand.Float64() * 100,  // 0–100 %
+			Voltage:   10 + rand.Float64()*5, // 10–15 V
+			Current:   rand.Float64() * 3,    // 0–3 A
+			Timestamp: time.Now().UnixMilli(),
+		}
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	w := worker.New(500*time.Millisecond, func(ctx context.Context) {
+		state := randomState()
+		data, _ := json.Marshal(state)
+		hub.Broadcast("telemetry", data)
+	})
+
+	w.Start(ctx)
+
 	// <--- http server --->
 	configureHttpServer(
 		podData,
+		hub,
 		config,
 	)
-
-	// Start loggers
-	loggerHandler.Start()
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)

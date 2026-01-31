@@ -39,7 +39,6 @@ func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNo
 	case *data.Packet:
 
 		var err error
-		//update := vehicle.updateFactory.NewUpdate(p)
 
 		fmt.Printf("XOCOLATEEEEEEEE")
 

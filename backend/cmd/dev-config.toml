@@ -20,6 +20,13 @@ boards = ["HVSCU", "HVSCU-Cabinet", "PCU", "LCU", "BCU", "BMSL"]
 [adj]
 branch = "software" # Leave blank when using ADJ as a submodule (like this: "")
 
+
+# Network Configuration
+[network]
+manual = false # Manual network device selection
+dev_mode = true # Enable development mode features
+
+
 # Server Configuration
 [server.ethernet-view]
 address = "127.0.0.1:4040"

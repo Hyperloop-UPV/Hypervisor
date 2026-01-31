@@ -6,6 +6,7 @@ import (
 	"os"
 
 	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
@@ -38,7 +39,9 @@ func configureVehicle(
 
 func configureHttpServer(
 	podData pod_data.PodData,
+	hub *sse.Hub,
 	config config.Config) {
+
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error creating podData handler: %v\n", err)
@@ -48,6 +51,7 @@ func configureHttpServer(
 		mux := h.NewMux(
 			h.Endpoint("/backend"+server.Endpoints.PodData, podDataHandle),
 			h.Endpoint(server.Endpoints.Files, h.HandleStatic(server.StaticPath)),
+			h.Endpoint("/backend/stream", hub),
 		)
 
 		httpServer := h.NewServer(server.Addr, mux)

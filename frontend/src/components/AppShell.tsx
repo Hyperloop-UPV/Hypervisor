@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import logo from "@/assets/logo.svg"
-
 interface AppShellProps {
   status: "connecting" | "open" | "closed"
   lastUpdatedAt: number | null
@@ -19,7 +18,11 @@ const navItems = [
   { to: "/batteries", label: "Batteries & HV" },
 ] as const
 
-export function AppShell({ status, lastUpdatedAt, children }: AppShellProps) {
+export function AppShell({
+  status,
+  lastUpdatedAt,
+  children,
+}: AppShellProps) {
   const statusLabel = statusLabelMap[status]
   const lastUpdated =
     lastUpdatedAt !== null ? new Date(lastUpdatedAt).toLocaleTimeString() : "--:--:--"
@@ -61,7 +64,7 @@ export function AppShell({ status, lastUpdatedAt, children }: AppShellProps) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 text-xs font-mono text-[#EDEEF0]/70">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#EDEEF0]/70">
             <div className="flex items-center gap-2">
               <span
                 className={cn(

@@ -41,9 +41,14 @@ func (s *Store) GetNextAutogenerateID() AutogenerateID {
 	return id
 }
 
-// GetMeasurementBase returns the measurement base map.
-func (s *Store) GetMeasurementBase() MeasurementBases {
-	return s.measuramentBase
+// GetMeasurementBase returns the measurement base map. as a JSON
+func (s *Store) GetMeasurementBase() []byte {
+	data, err := json.Marshal(s.measuramentBase)
+	if err != nil {
+		s.trace.Error().Err(err).Msg("error marshaling measurement base")
+		return []byte{}
+	}
+	return data
 }
 
 // generateEquivalences generates measurement ID equivalences from the hypervisor monitoring configuration file.
@@ -126,6 +131,12 @@ func (s *Store) initializeMeasurementBase(adj adj_module.ADJ, packetIDToBoard ma
 	// For each board in the equivalences
 	for boardID, packets := range s.boardsIDEquivalences {
 
+		boardIDInt, err := strconv.Atoi(string(boardID))
+		if err != nil {
+			s.trace.Error().Err(err).Msgf("error converting boardID to int: %s", boardID)
+			continue
+		}
+
 		// For each packet in the board
 		for packetID, measurements := range packets {
 
@@ -145,9 +156,10 @@ func (s *Store) initializeMeasurementBase(adj adj_module.ADJ, packetIDToBoard ma
 				// Create MeasurementBase entry
 				measurament := MeasurementBase{
 					MeasuramentID: string(measurementID),
-					BoardID:       string(boardID),
+					BoardID:       uint16(boardIDInt),
 					DisplayUnits:  adjMeasurementBase.DisplayUnits,
 					Type:          adjMeasurementBase.Type,
+					Value:         "-1",
 				}
 
 				// If the measurement is of enum type, add enum values

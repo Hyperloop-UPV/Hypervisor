@@ -5,15 +5,15 @@ import (
 	"fmt"
 )
 
-func (h *Hub) Broadcast(event string, data []byte) {
+func (h *Hub) Broadcast(data []byte) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
 	for c := range h.clients {
 
 		if _, err := fmt.Fprintf(c.writer,
-			"event: %s\ndata: %s\n\n",
-			event, data,
+			"data:%s\n\n",
+			data,
 		); err != nil {
 			// cliente muerto → eliminar
 			delete(h.clients, c)
@@ -23,11 +23,11 @@ func (h *Hub) Broadcast(event string, data []byte) {
 	}
 }
 
-func (h *Hub) BroadcastJSON(event string, v any) error {
+func (h *Hub) BroadcastJSON(v any) error {
 	data, err := json.Marshal(v)
 	if err != nil {
 		return err
 	}
-	h.Broadcast(event, data)
+	h.Broadcast(data)
 	return nil
 }

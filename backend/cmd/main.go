@@ -106,7 +106,10 @@ func main() {
 	)
 
 	// <-- Worker -->
-	hub := sse.NewHub(trace.Logger)
+	hub := sse.NewHub(
+		trace.Logger,
+		storage.GetMeasurementBase(),
+	)
 	http.Handle("/stream", hub)
 
 	ctx, cancel := context.WithCancel(context.Background())

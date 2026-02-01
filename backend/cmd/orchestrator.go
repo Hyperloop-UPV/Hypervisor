@@ -118,7 +118,7 @@ func setUpHypervisorWorker(
 		}
 
 		// Brodcast to each client
-		hub.Broadcast("telemetry", data)
+		hub.Broadcast(data)
 	})
 
 	w.Start(ctx)

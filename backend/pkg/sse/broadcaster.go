@@ -9,13 +9,16 @@ func (h *Hub) Broadcast(data []byte) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
+	// For each client
 	for c := range h.clients {
 
+		// send data
 		if _, err := fmt.Fprintf(c.writer,
 			"data:%s\n\n",
 			data,
 		); err != nil {
-			// cliente muerto → eliminar
+			// if error during connection remove
+			h.loggger.Debug().Msg("Client disconnected")
 			delete(h.clients, c)
 			continue
 		}

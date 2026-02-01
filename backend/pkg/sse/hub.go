@@ -27,7 +27,6 @@ func NewHub(logger zerolog.Logger, initialMessage []byte) *Hub {
 
 func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Headers CORS
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Content-Type", "text/event-stream")
@@ -38,7 +37,6 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 
 		// logger to log error
-
 		h.loggger.Error().Msg("Streaming unsupported")
 		return
 	}
@@ -56,16 +54,25 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(c.writer, "data: %s\n\n", h.initialMessage)
 	c.flusher.Flush()
 
-	h.loggger.Info().Msg("New client connected")
+	h.loggger.Debug().Msg("New client connected")
 
 	// After sending intial message we register the client
 	h.mutex.Lock()
 	h.clients[c] = struct{}{}
 	h.mutex.Unlock()
 
+	// Wait until connection is colosed
 	<-r.Context().Done()
 
 	h.mutex.Lock()
 	delete(h.clients, c)
 	h.mutex.Unlock()
+}
+
+// ClientCount returns the number of clients conected
+func (h *Hub) ClientCount() int {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+
+	return len(h.clients)
 }

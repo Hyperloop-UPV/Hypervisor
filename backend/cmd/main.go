@@ -135,5 +135,6 @@ func main() {
 	defer signal.Stop(interrupt)
 
 	<-interrupt
+	ctx.Done()
 	trace.Info().Msg("shutting down backend")
 }

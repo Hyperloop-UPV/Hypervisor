@@ -30,6 +30,7 @@ var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var versionFlag = flag.Bool("version", false, "Show the backend version")
+var loggerFlag = flag.Bool("L", false, "enable boards logging")
 
 type SubloggersMap map[abstraction.LoggerName]abstraction.Logger
 
@@ -121,6 +122,12 @@ func main() {
 		hub,
 		config,
 	)
+
+	// Start board logger if required
+	if *loggerFlag {
+
+		loggerHandler.Start()
+	}
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -11,6 +13,8 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	trace "github.com/rs/zerolog/log"
 )
@@ -72,11 +76,20 @@ func main() {
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
 
+	// <--- store --->
+	storage := store.NewStore(
+		trace.Logger,
+		adj,
+		createPacketIDToBoard(podData),
+		"../../hypervisor-monitoring.json",
+	)
+
 	// <--- vehicle --->
 	err = configureVehicle(
 		loggerHandler,
 		updateFactory,
 		transp,
+		storage,
 		adj,
 		config,
 	)
@@ -92,14 +105,28 @@ func main() {
 		config,
 	)
 
+	// <-- Worker -->
+	hub := sse.NewHub(
+		trace.Logger,
+		storage.GetMeasurementBase(),
+	)
+	http.Handle("/stream", hub)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	setUpHypervisorWorker(
+		ctx,
+		storage,
+		hub,
+	)
+
 	// <--- http server --->
 	configureHttpServer(
 		podData,
+		hub,
 		config,
 	)
-
-	// Start loggers
-	loggerHandler.Start()
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)

@@ -1,10 +1,11 @@
 package data
 
 import (
+	"fmt"
 	"reflect"
 )
 
-// ValueName is the name of the value
+// ValueName is the name of the value (also known as measurement ID)
 type ValueName string
 
 // valueType is the variable type of a data packet value
@@ -28,6 +29,7 @@ const (
 // Value is an interface over all kinds of values
 type Value interface {
 	Type() valueType
+	String() string
 }
 
 // numeric is a helper interface to group any kind of numeric variable
@@ -69,6 +71,11 @@ func (value NumericValue[N]) Type() valueType {
 	return valueType(reflect.TypeOf(value.inner).Name())
 }
 
+// String returns the stirng of a numeric value
+func (value NumericValue[N]) String() string {
+	return fmt.Sprintf("%v", value.inner)
+}
+
 // type assertion to check BooleanValue follows the Value interface
 var _ Value = BooleanValue{}
 
@@ -92,6 +99,11 @@ func (value BooleanValue) Value() bool {
 // Type returns the type of the boolean value
 func (value BooleanValue) Type() valueType {
 	return BoolType
+}
+
+// String returns the stringr of a boolean value
+func (value BooleanValue) String() string {
+	return fmt.Sprintf("%t", value.inner)
 }
 
 // EnumVariant is one of the variants an enum can have
@@ -123,4 +135,9 @@ func (value EnumValue) Variant() EnumVariant {
 // Type returns the type of the enum value
 func (value EnumValue) Type() valueType {
 	return EnumType
+}
+
+// String returns the string of the enum value
+func (value EnumValue) String() string {
+	return string(value.inner)
 }

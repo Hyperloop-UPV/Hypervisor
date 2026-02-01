@@ -40,14 +40,10 @@ func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNo
 
 		var err error
 
-		fmt.Printf("XOCOLATEEEEEEEE")
+		// Not in a goroutine because AddUpdatehas only CPU time and mutex
+		vehicle.storage.AddUpdate(p)
 
-		// TODO: SEND TO FRONTEND
-		// if err != nil {
-		// 	vehicle.trace.Error().Stack().Err(err).Msg("broker push")
-		// 	return errors.Join(fmt.Errorf("update data to frontend (data with id %d from %s to %s)", p.Id(), notification.From, notification.To), err)
-		// }
-
+		// add to storage
 		from, exists := vehicle.idToBoardName[notification.Packet.Id()]
 		if !exists {
 			from = notification.From

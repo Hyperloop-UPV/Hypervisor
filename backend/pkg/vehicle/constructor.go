@@ -3,6 +3,8 @@ package vehicle
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
+
 	"github.com/rs/zerolog"
 )
 
@@ -38,7 +40,8 @@ func (vehicle *Vehicle) SetUpdateFactory(updateFactory *update_factory.UpdateFac
 	vehicle.trace.Info().Type("updateFactory", updateFactory).Msg("set update factory")
 }
 
-func (vehicle *Vehicle) SetIdToBoardName(idToBoardName map[abstraction.PacketId]string) {
-	vehicle.idToBoardName = idToBoardName
-	vehicle.trace.Info().Msg("set id to board")
+func (vehicle *Vehicle) SetStorage(storage *store.Store) {
+
+	vehicle.storage = storage
+	vehicle.trace.Info().Type("storage", storage).Msg("set store")
 }

@@ -7,6 +7,7 @@ import (
 
 	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
@@ -23,6 +24,7 @@ func configureVehicle(
 	loggerHandler *logger.Logger,
 	updateFactory *update_factory.UpdateFactory,
 	transp *transport.Transport,
+	storage *store.Store,
 	adj adj_module.ADJ,
 	config config.Config,
 
@@ -32,6 +34,7 @@ func configureVehicle(
 	vehicle.SetLogger(loggerHandler)
 	vehicle.SetUpdateFactory(updateFactory)
 	vehicle.SetTransport(transp)
+	vehicle.SetStorage(storage)
 
 	return nil
 

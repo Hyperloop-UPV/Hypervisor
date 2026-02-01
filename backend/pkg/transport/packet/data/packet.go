@@ -3,7 +3,7 @@ package data
 import (
 	"time"
 
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 // Type assertion to check Data follows the abstraction.Packet interface

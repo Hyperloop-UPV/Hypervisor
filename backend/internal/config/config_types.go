@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.comHyperloop-UPV/Hypervisor/internal/server"
-	"github.comHyperloop-UPV/Hypervisor/pkg/logger"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/server"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
 )
 
 type App struct {

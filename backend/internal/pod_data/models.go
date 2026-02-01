@@ -1,8 +1,8 @@
 package pod_data
 
 import (
-	"github.comHyperloop-UPV/Hypervisor/internal/utils"
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/utils"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 type PodData struct {

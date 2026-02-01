@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 // TODO! Check methods using value and point receivers for the same function

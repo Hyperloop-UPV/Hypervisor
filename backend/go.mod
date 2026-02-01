@@ -1,4 +1,4 @@
-module github.comHyperloop-UPV/Hypervisor
+module github.com/Hyperloop-UPV/Hypervisor
 
 go 1.23.0
 

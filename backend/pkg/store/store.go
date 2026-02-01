@@ -5,10 +5,10 @@ import (
 	"os"
 	"strconv"
 
+	adj_module "github.com/Hyperloop-UPV/Hypervisor/internal/adj"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 	"github.com/rs/zerolog"
-	adj_module "github.comHyperloop-UPV/Hypervisor/internal/adj"
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 )
 
 // NewStore creates and initializes a new Store instance given a trace, adj, packetIDToBoard mapping, and monitoring file.

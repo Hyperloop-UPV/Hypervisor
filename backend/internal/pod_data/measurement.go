@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.comHyperloop-UPV/Hypervisor/internal/adj"
-	"github.comHyperloop-UPV/Hypervisor/internal/common"
-	"github.comHyperloop-UPV/Hypervisor/internal/utils"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/adj"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/common"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/utils"
 )
 
 const EnumType = "enum"

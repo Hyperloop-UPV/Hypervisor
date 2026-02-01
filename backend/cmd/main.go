@@ -8,14 +8,14 @@ import (
 	"os"
 	"os/signal"
 
+	adj_module "github.com/Hyperloop-UPV/Hypervisor/internal/adj"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/config"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/pod_data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport"
 	trace "github.com/rs/zerolog/log"
-	adj_module "github.comHyperloop-UPV/Hypervisor/internal/adj"
-	"github.comHyperloop-UPV/Hypervisor/internal/config"
-	"github.comHyperloop-UPV/Hypervisor/internal/pod_data"
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
-	"github.comHyperloop-UPV/Hypervisor/pkg/sse"
-	"github.comHyperloop-UPV/Hypervisor/pkg/store"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport"
 )
 
 const (

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
-	"github.comHyperloop-UPV/Hypervisor/pkg/logger"
-	data_logger "github.comHyperloop-UPV/Hypervisor/pkg/logger/data"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/packet/data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	data_logger "github.com/Hyperloop-UPV/Hypervisor/pkg/logger/data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 )
 
 // Notification is the method invoked by transport to notify of a new event (e.g.packet received)

@@ -3,7 +3,7 @@ package transport
 import (
 	"time"
 
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 // PacketNotification notifies of an incoming message

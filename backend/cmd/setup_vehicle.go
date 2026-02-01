@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"os"
 
-	h "github.comHyperloop-UPV/Hypervisor/pkg/http"
-	"github.comHyperloop-UPV/Hypervisor/pkg/sse"
-	"github.comHyperloop-UPV/Hypervisor/pkg/store"
+	h "github.com/Hyperloop-UPV/Hypervisor/pkg/http"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
 
+	adj_module "github.com/Hyperloop-UPV/Hypervisor/internal/adj"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/config"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/pod_data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport"
+	vehicle_module "github.com/Hyperloop-UPV/Hypervisor/pkg/vehicle"
 	trace "github.com/rs/zerolog/log"
-	adj_module "github.comHyperloop-UPV/Hypervisor/internal/adj"
-	"github.comHyperloop-UPV/Hypervisor/internal/config"
-	"github.comHyperloop-UPV/Hypervisor/internal/pod_data"
-	"github.comHyperloop-UPV/Hypervisor/pkg/logger"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport"
-	vehicle_module "github.comHyperloop-UPV/Hypervisor/pkg/vehicle"
 )
 
 func configureVehicle(

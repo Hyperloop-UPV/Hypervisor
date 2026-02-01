@@ -3,8 +3,8 @@ package store
 import (
 	"sync"
 
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 	"github.com/rs/zerolog"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 )
 
 type Store struct {

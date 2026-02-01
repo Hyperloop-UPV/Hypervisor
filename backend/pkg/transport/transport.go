@@ -8,13 +8,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/network"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/network/sniffer"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/network/udp"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/presentation"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/session"
 	"github.com/rs/zerolog"
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/network"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/network/sniffer"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/network/udp"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/presentation"
-	"github.comHyperloop-UPV/Hypervisor/pkg/transport/session"
 )
 
 // Transport is the module in charge of handling network communication with

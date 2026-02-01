@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"io"
 
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
 	"github.com/rs/zerolog"
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 type PacketEncoder interface {

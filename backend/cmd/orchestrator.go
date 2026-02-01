@@ -10,15 +10,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Hyperloop-UPV/Hypervisor/internal/config"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/pod_data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	data_logger "github.com/Hyperloop-UPV/Hypervisor/pkg/logger/data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/worker"
 	trace "github.com/rs/zerolog/log"
-	"github.comHyperloop-UPV/Hypervisor/internal/config"
-	"github.comHyperloop-UPV/Hypervisor/internal/pod_data"
-	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
-	"github.comHyperloop-UPV/Hypervisor/pkg/logger"
-	data_logger "github.comHyperloop-UPV/Hypervisor/pkg/logger/data"
-	"github.comHyperloop-UPV/Hypervisor/pkg/sse"
-	"github.comHyperloop-UPV/Hypervisor/pkg/store"
-	"github.comHyperloop-UPV/Hypervisor/pkg/worker"
 )
 
 // Handle version flag

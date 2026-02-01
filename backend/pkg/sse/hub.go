@@ -42,6 +42,10 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Start connection
+	fmt.Fprint(w, ": init\n\n")
+	flusher.Flush()
+
 	c := &client{
 		writer:  w,
 		flusher: flusher,

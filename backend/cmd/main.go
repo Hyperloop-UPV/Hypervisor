@@ -11,7 +11,6 @@ import (
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
@@ -66,10 +65,6 @@ func main() {
 	if err != nil {
 		trace.Fatal().Err(err).Msg("creating podData")
 	}
-
-	// <--- update factory --->
-	updateFactory := update_factory.NewFactory()
-
 	// <--- logger --->
 	loggerHandler, _ := setUpLogger(config)
 
@@ -87,7 +82,6 @@ func main() {
 	// <--- vehicle --->
 	err = configureVehicle(
 		loggerHandler,
-		updateFactory,
 		transp,
 		storage,
 		adj,

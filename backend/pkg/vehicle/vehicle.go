@@ -1,7 +1,6 @@
 package vehicle
 
 import (
-	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
 	"github.com/rs/zerolog"
@@ -15,7 +14,6 @@ type Vehicle struct {
 	transport     abstraction.Transport
 	logger        abstraction.Logger
 	storage       *store.Store
-	updateFactory *update_factory.UpdateFactory
 	idToBoardName map[abstraction.PacketId]string
 
 	trace zerolog.Logger

@@ -6,14 +6,14 @@ import (
 	"net"
 	"strings"
 
-	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	trace "github.com/rs/zerolog/log"
+	adj_module "github.comHyperloop-UPV/Hypervisor/internal/adj"
+	"github.comHyperloop-UPV/Hypervisor/internal/common"
+	"github.comHyperloop-UPV/Hypervisor/internal/config"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/network/sniffer"
 )
 
 func configureSnifferTransport(

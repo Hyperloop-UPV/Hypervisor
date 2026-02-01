@@ -1,8 +1,8 @@
 package adj
 
 import (
-	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.comHyperloop-UPV/Hypervisor/internal/utils"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 type ADJ struct {

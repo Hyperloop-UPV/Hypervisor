@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	loggerHandler "github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	loggerHandler "github.comHyperloop-UPV/Hypervisor/pkg/logger"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 )
 
 func createLoggerForTest(t *testing.T) *Logger {

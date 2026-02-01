@@ -4,7 +4,7 @@ package store
 import (
 	"fmt"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 )
 
 func (s *Store) AddUpdate(packet *data.Packet) {

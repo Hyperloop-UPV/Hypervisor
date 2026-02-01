@@ -3,11 +3,11 @@ package sniffer
 import (
 	"fmt"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/rs/zerolog"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/network"
 )
 
 // Sniffer provides a way to capture packets from the wire. It handles both capture

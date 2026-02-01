@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 // ErrUnrecognizedEvent is returned when the event passed to transport

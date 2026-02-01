@@ -4,9 +4,9 @@ import (
 	"net"
 	"sync"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/rs/zerolog"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/presentation"
 )
 
 func NewTransport(baseLogger zerolog.Logger) *Transport {

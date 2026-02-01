@@ -3,7 +3,7 @@ package vehicle
 import (
 	"fmt"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 type ErrUnexpectedNotification struct {

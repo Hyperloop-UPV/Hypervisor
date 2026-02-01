@@ -1,8 +1,8 @@
 package vehicle
 
 import (
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.comHyperloop-UPV/Hypervisor/pkg/store"
 
 	"github.com/rs/zerolog"
 )

@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/rs/zerolog"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 const (

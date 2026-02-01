@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
 	"github.com/rs/zerolog"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/network"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/session"
 )
 
 type testInputChunk struct {

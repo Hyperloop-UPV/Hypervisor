@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
+	"github.comHyperloop-UPV/Hypervisor/internal/utils"
 )
 
 const (

@@ -4,16 +4,16 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/udp"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	trace "github.com/rs/zerolog/log"
+	adj_module "github.comHyperloop-UPV/Hypervisor/internal/adj"
+	"github.comHyperloop-UPV/Hypervisor/internal/config"
+	"github.comHyperloop-UPV/Hypervisor/internal/pod_data"
+	"github.comHyperloop-UPV/Hypervisor/internal/utils"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/network/udp"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/packet/data"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/presentation"
 )
 
 // configureTransport initializes the transport decoder/encoder, sets packet ID -> target

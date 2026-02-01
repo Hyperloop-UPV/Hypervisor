@@ -29,6 +29,7 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Headers CORS
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")

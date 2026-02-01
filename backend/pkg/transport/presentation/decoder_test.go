@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/rs/zerolog"
+	"github.comHyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/packet/data"
+	"github.comHyperloop-UPV/Hypervisor/pkg/transport/presentation"
 )
 
 func TestDecoder(t *testing.T) {

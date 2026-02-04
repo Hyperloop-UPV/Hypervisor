@@ -7,7 +7,7 @@ import { MetricCard } from "@/components/MetricCard"
 import { PodDistanceVisualizer } from "@/components/PodDistanceVisualizer"
 
 export function LevitationDemoPage() {
-  const { signals } = useOutletContext<TelemetryOutletContext>()
+  const { signals, lastUpdatedAt } = useOutletContext<TelemetryOutletContext>()
   const {
     levitationDistance,
     levitationCurrent,
@@ -24,14 +24,17 @@ export function LevitationDemoPage() {
   const distanceSeries = useRollingTimeSeries(levitationDistance, {
     maxPoints: 120,
     minIntervalMs: 400,
+    sampleKey: lastUpdatedAt,
   })
   const currentSeries = useRollingTimeSeries(levitationCurrent, {
     maxPoints: 120,
     minIntervalMs: 400,
+    sampleKey: lastUpdatedAt,
   })
   const powerSeries = useRollingTimeSeries(levitationPower, {
     maxPoints: 120,
     minIntervalMs: 400,
+    sampleKey: lastUpdatedAt,
   })
 
   return (

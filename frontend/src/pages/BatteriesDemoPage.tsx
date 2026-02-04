@@ -41,7 +41,7 @@ const StatTile = ({ label, value, unit, formatValue, highlight = false }: {
 )
 
 export function BatteriesDemoPage() {
-  const { data, signals } = useOutletContext<TelemetryOutletContext>()
+  const { data, signals, lastUpdatedAt } = useOutletContext<TelemetryOutletContext>()
   const {
     dcBusVoltage,
     totalBatteryVoltage,
@@ -56,10 +56,12 @@ export function BatteriesDemoPage() {
   const dcBusSeries = useRollingTimeSeries(dcBusVoltage, {
     maxPoints: 120,
     minIntervalMs: 500,
+    sampleKey: lastUpdatedAt,
   })
   const totalVoltageSeries = useRollingTimeSeries(totalBatteryVoltage, {
     maxPoints: 120,
     minIntervalMs: 500,
+    sampleKey: lastUpdatedAt,
   })
 
   return (

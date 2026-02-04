@@ -4,7 +4,7 @@ import { AppShell } from "./components/AppShell"
 import { useTelemetry } from "./hooks/useTelemetry"
 
 const App: React.FC = () => {
-  const { data, status, lastUpdatedAt, signals } = useTelemetry("http://localhost:4040/backend/stream")
+  const { data, status, lastUpdatedAt, signals } = useTelemetry("http://localhost:4040/telemetry")
 
   const outletContext = useMemo(
     () => ({ data, signals, status, lastUpdatedAt }),

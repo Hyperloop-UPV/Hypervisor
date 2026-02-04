@@ -8,13 +8,14 @@ interface RollingSeriesPoint {
 interface RollingSeriesOptions {
   maxPoints?: number
   minIntervalMs?: number
+  sampleKey?: number | null
 }
 
 export function useRollingTimeSeries(
   value: number | null | undefined,
   options: RollingSeriesOptions = {},
 ) {
-  const { maxPoints = 120, minIntervalMs = 500 } = options
+  const { maxPoints = 120, minIntervalMs = 500, sampleKey } = options
   const [series, setSeries] = useState<RollingSeriesPoint[]>([])
   const lastAppendRef = useRef(0)
 
@@ -30,7 +31,7 @@ export function useRollingTimeSeries(
       if (next.length <= maxPoints) return next
       return next.slice(next.length - maxPoints)
     })
-  }, [value, maxPoints, minIntervalMs])
+  }, [value, sampleKey, maxPoints, minIntervalMs])
 
   return series
 }

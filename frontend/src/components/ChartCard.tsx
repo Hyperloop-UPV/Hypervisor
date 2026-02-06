@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LargeChart } from "@/components/LargeChart"
+import type { TimeSeriesPoint } from "@/components/SmallChart"
 
 type ChartCardProps = {
   title: string
   value: string
   unit: string
-  chartData: { ts: number; value: number | null }[]
+  chartData: TimeSeriesPoint[]
   tooltipLabel: string
   tooltipFormatter: (value: number | null) => string
   formatTime: (ts: number) => string

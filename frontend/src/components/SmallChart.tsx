@@ -2,7 +2,7 @@ import { LineChart, Line, ResponsiveContainer } from "recharts"
 
 const defaultStroke = "#FF7F24"
 
-export type TimeSeriesPoint = { ts: number; value: number | null }
+export type TimeSeriesPoint = { ts: number; value: number | null; idx: number }
 
 type TimeSeriesLineChartProps = {
   data: TimeSeriesPoint[]
@@ -21,7 +21,14 @@ export function SmallChart({
     <div className={`${heightClassName} w-full min-h-[1px] min-w-[1px]`}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
-          <Line type="monotone" dataKey="value" stroke={stroke} strokeWidth={strokeWidth} dot={false} />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            dot={false}
+            isAnimationActive={false}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -1,71 +1,56 @@
 import http from "node:http"
 
+const CONFIG = {
+  port: 4040,
+  ssePath: "/telemetry",
+  broadcastIntervalMs: 500,
+  includeValuesInDictionary: false,
+  dictionaryPlaceholderValue: null,
+  packCount: 18,
+  cellsPerPack: 6,
+  lcuAirgapCount: 8,
+  lcuCoilCount: 10,
+}
+
 const sseClients = new Set()
-const port = 8080
-const server = http.createServer((req, res) => {
-  if (req.method === "GET" && req.url === "/telemetry") {
-    res.writeHead(200, {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-      "Access-Control-Allow-Origin": "*",
-    })
-    res.write("retry: 1000\n\n")
-    sseClients.add(res)
-    res.write(`data: ${JSON.stringify(measurementDictionary)}\n\n`)
-
-    req.on("close", () => {
-      sseClients.delete(res)
-    })
-    return
-  }
-
-  res.writeHead(200, { "Content-Type": "text/plain", "Access-Control-Allow-Origin": "*" })
-  res.end("ok")
-})
-
-server.listen(port, () => {
-  console.log(`SSE server started on http://localhost:${port}/telemetry`)
-})
-
 const startTime = Date.now()
+
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 const rand = (min, max) => min + Math.random() * (max - min)
-
-const packCount = 18
-const cellsPerPack = 6
-const totalCells = packCount * cellsPerPack
-const baseCellVoltages = Array.from({ length: totalCells }, () => rand(4.08, 4.15))
-const baseCellTemps = Array.from({ length: totalCells }, () => rand(28, 34))
-
-const measurementDefs = []
-const addMeasurement = (measurementId, boardId, displayUnits) => {
-  measurementDefs.push({ measurementId, boardId, displayUnits })
-}
-
 const measurementKey = (measurementId, boardId) => `${boardId}:${measurementId}`
 
-for (let i = 1; i <= 8; i += 1) {
-  addMeasurement(`lcu_airgap_${i}`, 4, "mm")
-}
-for (let i = 1; i <= 10; i += 1) {
-  addMeasurement(`lcu_coil_current_${i}`, 4, "A")
-}
-
-addMeasurement("voltage_reading", 1, "V")
-addMeasurement("current_reading", 1, "A")
-addMeasurement("voltage_reading", 4, "V")
-addMeasurement("current_reading", 4, "A")
-addMeasurement("batteries_voltage_reading", 1, "V")
-addMeasurement("voltage_min", 1, "V")
-addMeasurement("voltage_max", 1, "V")
-
-for (let pack = 1; pack <= packCount; pack += 1) {
-  for (let cell = 1; cell <= cellsPerPack; cell += 1) {
-    addMeasurement(`battery${pack}_cell${cell}`, 1, "V")
+const createMeasurementDefs = () => {
+  const defs = []
+  const add = (measurementId, boardId, displayUnits) => {
+    defs.push({ measurementId, boardId, displayUnits })
   }
-  addMeasurement(`battery${pack}_total_voltage`, 1, "V")
+
+  for (let i = 1; i <= CONFIG.lcuAirgapCount; i += 1) {
+    add(`lcu_airgap_${i}`, 4, "mm")
+  }
+  for (let i = 1; i <= CONFIG.lcuCoilCount; i += 1) {
+    add(`lcu_coil_current_${i}`, 4, "A")
+  }
+
+  add("voltage_reading", 1, "V")
+  add("current_reading", 1, "A")
+  add("voltage_reading", 4, "V")
+  add("current_reading", 4, "A")
+  add("batteries_voltage_reading", 1, "V")
+  add("voltage_min", 1, "V")
+  add("voltage_max", 1, "V")
+
+  for (let pack = 1; pack <= CONFIG.packCount; pack += 1) {
+    for (let cell = 1; cell <= CONFIG.cellsPerPack; cell += 1) {
+      add(`battery${pack}_cell${cell}`, 1, "V")
+    }
+    add(`battery${pack}_total_voltage`, 1, "V")
+  }
+
+  return defs
 }
+
+const measurementDefs = createMeasurementDefs()
 
 const measurementDictionary = {}
 measurementDefs.forEach((def, index) => {
@@ -75,13 +60,18 @@ measurementDefs.forEach((def, index) => {
     measurement_id: def.measurementId,
     board_id: def.boardId,
     display_units: def.displayUnits,
-    value: "-1",
+    ...(CONFIG.includeValuesInDictionary
+      ? { value: CONFIG.dictionaryPlaceholderValue }
+      : {}),
   }
 })
 
 const measurementKeyById = new Map(
   measurementDefs.map((def) => [measurementKey(def.measurementId, def.boardId), def.key]),
 )
+
+const totalCells = CONFIG.packCount * CONFIG.cellsPerPack
+const baseCellVoltages = Array.from({ length: totalCells }, () => rand(4.08, 4.15))
 
 const generateMeasurementValues = () => {
   const elapsed = (Date.now() - startTime) / 1000
@@ -96,12 +86,12 @@ const generateMeasurementValues = () => {
   const allCellVoltages = []
   let totalBatteryVoltage = 0
 
-  for (let packIndex = 0; packIndex < packCount; packIndex += 1) {
+  for (let packIndex = 0; packIndex < CONFIG.packCount; packIndex += 1) {
     const packId = packIndex + 1
-    const offset = packIndex * cellsPerPack
+    const offset = packIndex * CONFIG.cellsPerPack
     const cellVoltages = []
 
-    for (let cellIndex = 0; cellIndex < cellsPerPack; cellIndex += 1) {
+    for (let cellIndex = 0; cellIndex < CONFIG.cellsPerPack; cellIndex += 1) {
       const idx = offset + cellIndex
       const voltage = Number(
         (
@@ -132,7 +122,10 @@ const generateMeasurementValues = () => {
   )
   valuesByMeasurement.set(measurementKey("voltage_reading", 1), Number(dcBusVoltage.toFixed(2)))
   valuesByMeasurement.set(measurementKey("current_reading", 1), Number(levitationCurrent.toFixed(1)))
-  valuesByMeasurement.set(measurementKey("voltage_reading", 4), Number((dcBusVoltage + 2).toFixed(2)))
+  valuesByMeasurement.set(
+    measurementKey("voltage_reading", 4),
+    Number((dcBusVoltage + 2).toFixed(2)),
+  )
   valuesByMeasurement.set(
     measurementKey("current_reading", 4),
     Number((levitationCurrent + 3).toFixed(1)),
@@ -146,14 +139,14 @@ const generateMeasurementValues = () => {
     allCellVoltages.length ? Math.max(...allCellVoltages) : null,
   )
 
-  for (let i = 1; i <= 8; i += 1) {
+  for (let i = 1; i <= CONFIG.lcuAirgapCount; i += 1) {
     valuesByMeasurement.set(
       measurementKey(`lcu_airgap_${i}`, 4),
       Number((levitationDistance + rand(-0.4, 0.4)).toFixed(2)),
     )
   }
 
-  for (let i = 1; i <= 10; i += 1) {
+  for (let i = 1; i <= CONFIG.lcuCoilCount; i += 1) {
     valuesByMeasurement.set(
       measurementKey(`lcu_coil_current_${i}`, 4),
       Number((levitationCurrent + rand(-4, 4)).toFixed(1)),
@@ -185,4 +178,30 @@ const broadcastTelemetry = () => {
   sendPayload(updates)
 }
 
-setInterval(broadcastTelemetry, 500)
+const server = http.createServer((req, res) => {
+  if (req.method === "GET" && req.url === CONFIG.ssePath) {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "Access-Control-Allow-Origin": "*",
+    })
+    res.write("retry: 1000\n\n")
+    sseClients.add(res)
+    res.write(`data: ${JSON.stringify(measurementDictionary)}\n\n`)
+
+    req.on("close", () => {
+      sseClients.delete(res)
+    })
+    return
+  }
+
+  res.writeHead(200, { "Content-Type": "text/plain", "Access-Control-Allow-Origin": "*" })
+  res.end("ok")
+})
+
+server.listen(CONFIG.port, () => {
+  console.log(`SSE server started on http://localhost:${CONFIG.port}${CONFIG.ssePath}`)
+})
+
+setInterval(broadcastTelemetry, CONFIG.broadcastIntervalMs)

@@ -75,7 +75,6 @@ measurementDefs.forEach((def, index) => {
         measurement_id: def.measurementId,
         board_id: def.boardId,
         display_units: def.displayUnits,
-        value: "-1",
     }
 })
 

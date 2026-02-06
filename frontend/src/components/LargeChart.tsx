@@ -38,14 +38,37 @@ export function LargeChart({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-          <XAxis dataKey="ts" tickFormatter={formatTime} stroke="#EDEEF0" tick={axisTick} />
+          <XAxis
+            dataKey="idx"
+            type="number"
+            allowDecimals={false}
+            domain={[0, Math.max(data.length - 1, 0)]}
+            tickFormatter={(idx) => {
+              const point = data[idx as number]
+              if (!point || point.value === null || Number.isNaN(point.ts)) return ""
+              return formatTime(point.ts)
+            }}
+            stroke="#EDEEF0"
+            tick={axisTick}
+          />
           <YAxis stroke="#EDEEF0" tick={axisTick} width={yAxisWidth} />
           <Tooltip
-            labelFormatter={(label) => formatTime(label as number)}
+            labelFormatter={(label) => {
+              const point = data[label as number]
+              if (!point || point.value === null || Number.isNaN(point.ts)) return ""
+              return formatTime(point.ts)
+            }}
             formatter={(value) => [tooltipFormatter(value as number | null), tooltipLabel]}
             contentStyle={tooltipStyle}
           />
-          <Line type="monotone" dataKey="value" stroke={stroke} strokeWidth={strokeWidth} dot={false} />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            dot={false}
+            isAnimationActive={false}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -11,7 +11,7 @@ import (
 // Hub maintains the set of active clients and broadcasts messages to the clients.
 type Hub struct {
 	mutex          sync.Mutex
-	clients        map[*client]struct{} // set of clients
+	clients        map[*Client]struct{} // set of clients
 	initialMessage []byte
 	loggger        zerolog.Logger
 }
@@ -19,7 +19,7 @@ type Hub struct {
 // NewHub creates a new Hub
 func NewHub(logger zerolog.Logger, initialMessage []byte) *Hub {
 	return &Hub{
-		clients:        make(map[*client]struct{}),
+		clients:        make(map[*Client]struct{}),
 		initialMessage: initialMessage,
 		loggger:        logger,
 	}
@@ -45,21 +45,21 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, ": init\n\n")
 	flusher.Flush()
 
-	c := &client{
+	c := &Client{
 		writer:  w,
 		flusher: flusher,
 	}
+
+	// After sending intial message we regdister the client
+	h.mutex.Lock()
+	h.clients[c] = struct{}{}
+	h.mutex.Unlock()
 
 	// Send initial welcome message before registering client
 	fmt.Fprintf(c.writer, "data: %s\n\n", h.initialMessage)
 	c.flusher.Flush()
 
 	h.loggger.Debug().Msg("New client connected")
-
-	// After sending intial message we register the client
-	h.mutex.Lock()
-	h.clients[c] = struct{}{}
-	h.mutex.Unlock()
 
 	// Wait until connection is colosed
 	<-r.Context().Done()

@@ -6,15 +6,21 @@ import (
 )
 
 func (h *Hub) Broadcast(data []byte) {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
 
-	// For each client
+	h.mutex.Lock()
+
+	clients := make(map[*Client]struct{})
 	for c := range h.clients {
+		clients[c] = struct{}{}
+	}
+
+	h.mutex.Unlock()
+
+	for c := range clients {
 
 		// send data
 		if _, err := fmt.Fprintf(c.writer,
-			"data:%s\n\n",
+			"data: %s\n\n",
 			data,
 		); err != nil {
 			// if error during connection remove

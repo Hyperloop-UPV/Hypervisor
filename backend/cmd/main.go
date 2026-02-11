@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -119,16 +120,21 @@ func main() {
 	)
 
 	// <--- http server --->
-	configureHttpServer(
+	srv := configureHttpServer(
 		hub,
 		config,
 	)
+	// start server
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
 
 	// Start board logger if required
-	if *loggerFlag {
 
-		loggerHandler.Start()
-	}
+	loggerHandler.Start()
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)

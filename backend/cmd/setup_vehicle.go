@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"net/http"
 
 	h "github.com/Hyperloop-UPV/Hypervisor/pkg/http"
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
@@ -37,14 +37,17 @@ func configureVehicle(
 func configureHttpServer(
 	hub *sse.Hub,
 	config config.Config,
-) {
+) *http.Server {
 
 	mux := h.NewMux(
 		h.Endpoint("/backend/stream", hub),
 		h.Endpoint("/", h.HandleStatic(config.App.StaticPath)),
 	)
 
-	httpServer := h.NewServer(config.App.Addr, mux)
+	srv := &http.Server{
+		Addr:    config.App.Addr,
+		Handler: mux,
+	}
 
-	log.Fatal(httpServer.ListenAndServe())
+	return srv
 }

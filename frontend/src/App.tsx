@@ -5,7 +5,7 @@ import { useTelemetry } from "./hooks/useTelemetry"
 import { useTelemetrySeries } from "./hooks/useTelemetrySeries"
 
 const App: React.FC = () => {
-  const { data, status, lastUpdatedAt, signals } = useTelemetry("http://localhost:4040/telemetry")
+  const { data, status, lastUpdatedAt, signals } = useTelemetry(import.meta.env.VITE_SSE_URL)
   const series = useTelemetrySeries(signals, lastUpdatedAt)
 
   const outletContext = useMemo(

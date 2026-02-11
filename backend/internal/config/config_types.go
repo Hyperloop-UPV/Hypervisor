@@ -1,16 +1,20 @@
 package config
 
 import (
-	"github.com/Hyperloop-UPV/Hypervisor/internal/server"
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
 )
 
 type App struct {
-	AutomaticWindowOpening string `toml:"automatic_window_opening"`
+	Addr       string `toml:"addr"`
+	StaticPath string `toml:"static_path"`
 }
 
 type Adj struct {
 	Branch string `toml:"branch"`
+}
+
+type Network struct {
+	DevMode bool `toml:"dev_mode"`
 }
 
 type Logging struct {
@@ -20,12 +24,7 @@ type Logging struct {
 
 type Config struct {
 	App     App
-	Server  server.Config
 	Adj     Adj
 	Network Network
 	Logging Logging
-}
-
-type Network struct {
-	DevMode bool `toml:"dev_mode"`
 }

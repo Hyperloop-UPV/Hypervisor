@@ -22,7 +22,6 @@ func GetConfig(path string) (Config, error) {
 
 	var config Config
 
-	// TODO: add strict mode (DisallowUnkownFields)
 	decodeErr := toml.NewDecoder(reader).Decode(&config)
 
 	if decodeErr != nil {

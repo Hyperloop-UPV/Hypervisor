@@ -16,7 +16,6 @@ branch = "Test_Hypervisor" # Leave blank when using ADJ as a submodule (like thi
 
 # Network Configuration
 [network]
-manual = false # Manual network device selection
 dev_mode = false # Enable development mode features
 
 # Logger Configuration

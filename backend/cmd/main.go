@@ -80,6 +80,16 @@ func main() {
 		"../../hypervisor-monitoring.json",
 	)
 
+	// <--- SSE Hub --->
+	hub := sse.NewHub(
+		trace.Logger,
+		storage.GetMeasurementBase(),
+	)
+	http.Handle("/stream", hub)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// <--- vehicle --->
 	err = configureVehicle(
 		loggerHandler,
@@ -101,14 +111,6 @@ func main() {
 	)
 
 	// <-- Worker -->
-	hub := sse.NewHub(
-		trace.Logger,
-		storage.GetMeasurementBase(),
-	)
-	http.Handle("/stream", hub)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	setUpHypervisorWorker(
 		ctx,
@@ -118,7 +120,6 @@ func main() {
 
 	// <--- http server --->
 	configureHttpServer(
-		podData,
 		hub,
 		config,
 	)

@@ -15,6 +15,7 @@ import (
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
 	data_logger "github.com/Hyperloop-UPV/Hypervisor/pkg/logger/data"
+	status_logger "github.com/Hyperloop-UPV/Hypervisor/pkg/logger/status"
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/worker"
@@ -85,7 +86,8 @@ func setupRuntimeCPU() func() {
 func setUpLogger(config config.Config) (*logger.Logger, SubloggersMap) {
 
 	var subloggers = SubloggersMap{
-		data_logger.Name: data_logger.NewLogger(),
+		data_logger.Name:   data_logger.NewLogger(),
+		status_logger.Name: status_logger.NewLogger(),
 	}
 
 	logger.ConfigureLogger(config.Logging.TimeUnit, config.Logging.LoggingPath)

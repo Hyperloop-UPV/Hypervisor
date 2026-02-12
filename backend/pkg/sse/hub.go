@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger/status"
 	"github.com/rs/zerolog"
 )
 
@@ -13,15 +16,17 @@ type Hub struct {
 	mutex          sync.Mutex
 	clients        map[*Client]struct{} // set of clients
 	initialMessage []byte
-	loggger        zerolog.Logger
+	trace          zerolog.Logger
+	statusLogger   abstraction.Logger
 }
 
 // NewHub creates a new Hub
-func NewHub(logger zerolog.Logger, initialMessage []byte) *Hub {
+func NewHub(trace zerolog.Logger, initialMessage []byte, statusLogger abstraction.Logger) *Hub {
 	return &Hub{
 		clients:        make(map[*Client]struct{}),
 		initialMessage: initialMessage,
-		loggger:        logger,
+		trace:          trace,
+		statusLogger:   statusLogger,
 	}
 }
 
@@ -37,7 +42,7 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 
 		// logger to log error
-		h.loggger.Error().Msg("Streaming unsupported")
+		h.trace.Error().Msg("Streaming unsupported")
 		return
 	}
 
@@ -59,7 +64,16 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(c.writer, "data: %s\n\n", h.initialMessage)
 	c.flusher.Flush()
 
-	h.loggger.Debug().Msg("New client connected")
+	// Log connection to trace
+	h.trace.Debug().Msg("New client connected")
+
+	// Log connection to status logger
+	h.statusLogger.PushRecord(&status.Record{
+		IP:             r.RemoteAddr,
+		UA:             r.Header.Get("User-Agent"),
+		ConnectionType: "CONNECTION",
+		Timestamp:      time.Now(),
+	})
 
 	// Wait until connection is colosed
 	<-r.Context().Done()

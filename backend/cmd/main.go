@@ -85,6 +85,7 @@ func main() {
 	hub := sse.NewHub(
 		trace.Logger,
 		storage.GetMeasurementBase(),
+		loggerHandler,
 	)
 	http.Handle("/stream", hub)
 

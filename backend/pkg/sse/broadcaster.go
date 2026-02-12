@@ -3,6 +3,9 @@ package sse
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger/status"
 )
 
 func (h *Hub) Broadcast(data []byte) {
@@ -24,8 +27,20 @@ func (h *Hub) Broadcast(data []byte) {
 			data,
 		); err != nil {
 			// if error during connection remove
-			h.loggger.Debug().Msg("Client disconnected")
+			h.trace.Debug().Msg("Client disconnected")
+
+			fmt.Printf("Client disconnected: %v\n", err)
+
+			h.statusLogger.PushRecord(&status.Record{
+				IP:             c.writer.Header().Get("X-Forwarded-For"),
+				UA:             c.writer.Header().Get("User-Agent"),
+				ConnectionType: "DISCONNECTION",
+				Timestamp:      time.Now(),
+			})
+
+			h.mutex.Lock()
 			delete(h.clients, c)
+			h.mutex.Unlock()
 			continue
 		}
 		c.flusher.Flush()

@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sync/atomic"
 	"time"
 
-	loggerbase "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/base"
-
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/file"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger/file"
 )
 
 const (
@@ -18,13 +17,17 @@ const (
 )
 
 type Logger struct {
-	*loggerbase.BaseLogger
-
-	writer *file.CSV
+	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
+	running *atomic.Bool
+	writer  *file.CSV
 }
 
-// Record is a struct that implements the abstraction.LoggerRecord interface but we add the Name method
-type Record loggerbase.Record
+type Record struct {
+	IP             string
+	UA             string
+	ConnectionType string
+	Timestamp      time.Time
+}
 
 func (*Record) Name() abstraction.LoggerName {
 	return Name
@@ -32,27 +35,24 @@ func (*Record) Name() abstraction.LoggerName {
 
 func NewLogger() *Logger {
 	return &Logger{
-		BaseLogger: loggerbase.NewBaseLogger(Name),
-		writer:     nil,
+		running: &atomic.Bool{},
+		writer:  nil,
 	}
 }
 
 func (sublogger *Logger) Start() error {
-
-	if !sublogger.Running.CompareAndSwap(false, true) {
+	if !sublogger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	// Create the file for logging, if the logger was already running
+
 	fileRaw, err := sublogger.createFile()
 	if err != nil {
 		return err
 	}
-
-	sublogger.StartTime = logger.FormatTimestamp(time.Now()) // Update the start time
-
 	sublogger.writer = file.NewCSV(fileRaw)
-	fmt.Println("Logger started " + string(sublogger.Name) + ".")
+
+	fmt.Println("Logger started")
 	return nil
 }
 
@@ -60,22 +60,31 @@ func (sublogger *Logger) createFile() (*os.File, error) {
 	filename := path.Join(
 		"logger",
 		logger.Timestamp.Format(logger.TimestampFormat),
-		"order",
-		"order.csv",
+		"status",
+		"status.csv",
 	)
 
-	return sublogger.BaseLogger.CreateFile(filename)
+	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
+	if err != nil {
+		return nil, logger.ErrCreatingAllDir{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Path:      filename,
+		}
+	}
+
+	return os.Create(filename)
 }
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	if !sublogger.Running.Load() {
+	if !sublogger.running.Load() {
 		return logger.ErrLoggerNotRunning{
 			Name:      Name,
 			Timestamp: time.Now(),
 		}
 	}
 
-	orderRecord, ok := record.(*Record)
+	statusRecord, ok := record.(*Record)
 	if !ok {
 		return logger.ErrWrongRecordType{
 			Name:      Name,
@@ -86,12 +95,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	}
 
 	err := sublogger.writer.Write([]string{
-		fmt.Sprint(logger.FormatTimestamp(orderRecord.Packet.Timestamp()) - sublogger.StartTime),
-		orderRecord.From,
-		orderRecord.To,
-		fmt.Sprint(orderRecord.Packet.Id()),
-		fmt.Sprint(orderRecord.Packet.GetValues()),
-		orderRecord.Timestamp.Format(time.RFC3339),
+
+		statusRecord.IP,
+		statusRecord.UA,
+		statusRecord.ConnectionType,
+		statusRecord.Timestamp.Format(time.RFC3339),
 	})
 	sublogger.writer.Flush()
 	if err != nil {
@@ -105,18 +113,24 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return nil
 }
 
-// Base Stop method with custom close function
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
+	panic("TODO!")
+}
+
 func (sublogger *Logger) Stop() error {
+	if !sublogger.running.CompareAndSwap(true, false) {
+		fmt.Println("Logger already stopped")
+		return nil
+	}
 
-	return sublogger.BaseLogger.Stop(func() error {
-		err := sublogger.writer.Close()
-		if err != nil {
-			return logger.ErrClosingFile{
-				Name:      Name,
-				Timestamp: time.Now(),
-			}
+	err := sublogger.writer.Close()
+	if err != nil {
+		return logger.ErrClosingFile{
+			Name:      Name,
+			Timestamp: time.Now(),
 		}
+	}
 
-		return err
-	})
+	fmt.Println("Logger stopped")
+	return nil
 }

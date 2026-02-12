@@ -25,6 +25,7 @@ const (
 )
 
 var configFile = flag.String("config", "config.toml", "path to configuration file")
+var monitoringFile = flag.String("monitoring", "hypervisor-monitoring.json", "file where monitoring data is stored")
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "", "set the trace log file")
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
@@ -78,7 +79,7 @@ func main() {
 		trace.Logger,
 		adj,
 		createPacketIDToBoard(podData),
-		"../../hypervisor-monitoring.json",
+		*monitoringFile,
 	)
 
 	// <--- SSE Hub --->

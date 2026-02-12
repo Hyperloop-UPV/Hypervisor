@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 
 	h "github.com/Hyperloop-UPV/Hypervisor/pkg/http"
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
@@ -41,7 +43,7 @@ func configureHttpServer(
 
 	mux := h.NewMux(
 		h.Endpoint("/backend/stream", hub),
-		h.Endpoint("/", h.HandleStatic(config.App.StaticPath)),
+		h.Endpoint("/", HandleSPA(config.App.StaticPath)),
 	)
 
 	srv := &http.Server{
@@ -50,4 +52,20 @@ func configureHttpServer(
 	}
 
 	return srv
+}
+
+func HandleSPA(staticPath string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		filePath := filepath.Join(staticPath, r.URL.Path)
+
+		// Si el archivo existe → servirlo
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			http.ServeFile(w, r, filePath)
+			return
+		}
+
+		// Si no → devolver index.html
+		http.ServeFile(w, r, filepath.Join(staticPath, "index.html"))
+	}
 }

@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SmallChart } from "@/components/SmallChart"
+import type { TimeSeriesPoint } from "@/components/SmallChart"
 
 export type MetricCardProps = {
   title: string
   value: string
   unit: string
   accentClassName?: string
-  chartData?: { ts: number; value: number | null }[]
+  chartData?: TimeSeriesPoint[]
   chartHeightClassName?: string
 }
 

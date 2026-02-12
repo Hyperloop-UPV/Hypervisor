@@ -3,19 +3,19 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 
-	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
+	adj_module "github.com/Hyperloop-UPV/Hypervisor/internal/adj"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/config"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/pod_data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -25,12 +25,14 @@ const (
 )
 
 var configFile = flag.String("config", "config.toml", "path to configuration file")
+var monitoringFile = flag.String("monitoring", "hypervisor-monitoring.json", "file where monitoring data is stored")
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "", "set the trace log file")
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var versionFlag = flag.Bool("version", false, "Show the backend version")
+var loggerFlag = flag.Bool("L", false, "enable boards logging")
 
 type SubloggersMap map[abstraction.LoggerName]abstraction.Logger
 
@@ -66,10 +68,6 @@ func main() {
 	if err != nil {
 		trace.Fatal().Err(err).Msg("creating podData")
 	}
-
-	// <--- update factory --->
-	updateFactory := update_factory.NewFactory()
-
 	// <--- logger --->
 	loggerHandler, _ := setUpLogger(config)
 
@@ -81,13 +79,23 @@ func main() {
 		trace.Logger,
 		adj,
 		createPacketIDToBoard(podData),
-		"../../hypervisor-monitoring.json",
+		*monitoringFile,
 	)
+
+	// <--- SSE Hub --->
+	hub := sse.NewHub(
+		trace.Logger,
+		storage.GetMeasurementBase(),
+		loggerHandler,
+	)
+	http.Handle("/stream", hub)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// <--- vehicle --->
 	err = configureVehicle(
 		loggerHandler,
-		updateFactory,
 		transp,
 		storage,
 		adj,
@@ -106,14 +114,6 @@ func main() {
 	)
 
 	// <-- Worker -->
-	hub := sse.NewHub(
-		trace.Logger,
-		storage.GetMeasurementBase(),
-	)
-	http.Handle("/stream", hub)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	setUpHypervisorWorker(
 		ctx,
@@ -122,11 +122,21 @@ func main() {
 	)
 
 	// <--- http server --->
-	configureHttpServer(
-		podData,
+	srv := configureHttpServer(
 		hub,
 		config,
 	)
+	// start server
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	// Start board logger if required
+
+	loggerHandler.Start()
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)
@@ -134,5 +144,6 @@ func main() {
 	defer signal.Stop(interrupt)
 
 	<-interrupt
+	ctx.Done()
 	trace.Info().Msg("shutting down backend")
 }

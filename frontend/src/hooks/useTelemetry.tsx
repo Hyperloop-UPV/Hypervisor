@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import type { TelemetryData } from "../types/telemetry"
 import type { MeasurementDictionary } from "@/hooks/telemetryUtils"
 import {
-  applyMeasurementUpdate,
-  buildTelemetryData,
+  applyUpdateAndBuildTelemetry,
+  buildTelemetryFromInitialDictionary,
   getTelemetrySignals,
+  hasMeasurementValues,
   isMeasurementDictionary,
   isMeasurementUpdate,
 } from "@/hooks/telemetryUtils"
@@ -20,6 +21,21 @@ export const useTelemetry = (url: string) => {
   useEffect(() => {
     const source = new EventSource(url)
 
+    const handleInitialDictionary = (payload: MeasurementDictionary, now: number) => {
+      // Initial dictionary payload: defines all measurement ids/units and may or may not include values.
+      dictionaryRef.current = { ...payload }
+      setData(buildTelemetryFromInitialDictionary(dictionaryRef.current))
+      if (hasMeasurementValues(dictionaryRef.current)) {
+        setLastUpdatedAt(now)
+      }
+    }
+
+    const handleUpdate = (payload: Record<string, string | null | undefined>, now: number) => {
+      // Incremental update payload: just values keyed by measurement id.
+      setData(applyUpdateAndBuildTelemetry(dictionaryRef.current, payload))
+      setLastUpdatedAt(now)
+    }
+
     source.onopen = () => setStatus("open")
     source.onerror = () => {
       setStatus(source.readyState === EventSource.CLOSED ? "closed" : "connecting")
@@ -30,16 +46,12 @@ export const useTelemetry = (url: string) => {
       const now = Date.now()
 
       if (isMeasurementDictionary(payload)) {
-        dictionaryRef.current = { ...payload }
-        setData(buildTelemetryData(dictionaryRef.current))
-        setLastUpdatedAt(now)
+        handleInitialDictionary(payload, now)
         return
       }
 
       if (!isMeasurementUpdate(payload)) return
-      applyMeasurementUpdate(dictionaryRef.current, payload)
-      setData(buildTelemetryData(dictionaryRef.current))
-      setLastUpdatedAt(now)
+      handleUpdate(payload, now)
     }
 
     return () => {

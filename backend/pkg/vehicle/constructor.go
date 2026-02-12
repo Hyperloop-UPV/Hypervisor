@@ -1,9 +1,8 @@
 package vehicle
 
 import (
-	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
 
 	"github.com/rs/zerolog"
 )
@@ -33,11 +32,6 @@ func (vehicle *Vehicle) SetTransport(transport abstraction.Transport) {
 func (vehicle *Vehicle) SetLogger(logger abstraction.Logger) {
 	vehicle.logger = logger
 	vehicle.trace.Info().Type("logger", logger).Msg("set logger")
-}
-
-func (vehicle *Vehicle) SetUpdateFactory(updateFactory *update_factory.UpdateFactory) {
-	vehicle.updateFactory = updateFactory
-	vehicle.trace.Info().Type("updateFactory", updateFactory).Msg("set update factory")
 }
 
 func (vehicle *Vehicle) SetStorage(storage *store.Store) {

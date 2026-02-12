@@ -1,28 +1,25 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 
-	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
+	h "github.com/Hyperloop-UPV/Hypervisor/pkg/http"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
 
-	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
-	vehicle_module "github.com/HyperloopUPV-H8/h9-backend/pkg/vehicle"
+	adj_module "github.com/Hyperloop-UPV/Hypervisor/internal/adj"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/config"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport"
+	vehicle_module "github.com/Hyperloop-UPV/Hypervisor/pkg/vehicle"
 	trace "github.com/rs/zerolog/log"
 )
 
 func configureVehicle(
 
 	loggerHandler *logger.Logger,
-	updateFactory *update_factory.UpdateFactory,
 	transp *transport.Transport,
 	storage *store.Store,
 	adj adj_module.ADJ,
@@ -32,7 +29,6 @@ func configureVehicle(
 
 	vehicle := vehicle_module.New(trace.Logger)
 	vehicle.SetLogger(loggerHandler)
-	vehicle.SetUpdateFactory(updateFactory)
 	vehicle.SetTransport(transp)
 	vehicle.SetStorage(storage)
 
@@ -41,25 +37,35 @@ func configureVehicle(
 }
 
 func configureHttpServer(
-	podData pod_data.PodData,
 	hub *sse.Hub,
-	config config.Config) {
+	config config.Config,
+) *http.Server {
 
-	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error creating podData handler: %v\n", err)
+	mux := h.NewMux(
+		h.Endpoint("/backend/stream", hub),
+		h.Endpoint("/", HandleSPA(config.App.StaticPath)),
+	)
+
+	srv := &http.Server{
+		Addr:    config.App.Addr,
+		Handler: mux,
 	}
 
-	for _, server := range config.Server {
-		mux := h.NewMux(
-			h.Endpoint("/backend"+server.Endpoints.PodData, podDataHandle),
-			h.Endpoint(server.Endpoints.Files, h.HandleStatic(server.StaticPath)),
-			h.Endpoint("/backend/stream", hub),
-		)
+	return srv
+}
 
-		httpServer := h.NewServer(server.Addr, mux)
-		go httpServer.ListenAndServe()
+func HandleSPA(staticPath string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		filePath := filepath.Join(staticPath, r.URL.Path)
+
+		// Si el archivo existe → servirlo
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			http.ServeFile(w, r, filePath)
+			return
+		}
+
+		// Si no → devolver index.html
+		http.ServeFile(w, r, filepath.Join(staticPath, "index.html"))
 	}
-
-	go http.ListenAndServe("127.0.0.1:4040", nil)
 }

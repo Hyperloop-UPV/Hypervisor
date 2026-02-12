@@ -45,14 +45,14 @@ export function AppShell({
             </div>
           </div>
 
-          <nav className="w-full sm:w-auto flex items-stretch gap-2 bg-[#1a2035] p-1 rounded-full border border-white/10 sm:h-11">
+          <nav className="w-full sm:w-auto flex items-stretch gap-2 bg-[#1a2035] p-1 rounded-full border border-white/10 h-11">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex-1 h-full px-4 py-2 rounded-full text-center text-sm font-bold uppercase tracking-wider transition-colors flex items-center justify-center",
+                    "flex-1 h-full px-3 sm:px-4 py-2 rounded-full text-center text-[11px] sm:text-sm font-bold uppercase tracking-wider whitespace-nowrap leading-none transition-colors flex items-center justify-center",
                     isActive
                       ? "bg-[#FF7F24] text-black"
                       : "text-[#EDEEF0]/70 hover:text-white",

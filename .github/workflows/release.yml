@@ -1,0 +1,75 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      # -------------------------
+      # Checkout
+      # -------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------
+      # Setup Node
+      # -------------------------
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      # -------------------------
+      # Setup Go
+      # -------------------------
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.23
+
+      # -------------------------
+      # Cache Go modules
+      # -------------------------
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      # -------------------------
+      # Install ncap
+      # -------------------------
+      - name: Install libpcap
+        run: sudo apt-get update && sudo apt-get install -y libpcap-dev
+      # -------------------------
+      # Build project
+      # -------------------------
+      - name: Build using Makefile
+        run: make build
+
+      # -------------------------
+      # Create zip artifact
+      # -------------------------
+      - name: Package release
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          zip -r release-${VERSION}.zip release
+
+      # -------------------------
+      # Create GitHub Release
+      # -------------------------
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-*.zip

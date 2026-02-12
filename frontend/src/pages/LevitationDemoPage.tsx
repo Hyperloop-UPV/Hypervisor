@@ -1,13 +1,12 @@
 import { useOutletContext } from "react-router-dom"
 import type { TelemetryOutletContext } from "@/types/app"
-import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries"
 import { formatTime, formatValue } from "@/lib/demoHelpers"
 import { ChartCard } from "@/components/ChartCard"
 import { MetricCard } from "@/components/MetricCard"
 import { PodDistanceVisualizer } from "@/components/PodDistanceVisualizer"
 
 export function LevitationDemoPage() {
-  const { signals } = useOutletContext<TelemetryOutletContext>()
+  const { signals, series } = useOutletContext<TelemetryOutletContext>()
   const {
     levitationDistance,
     levitationCurrent,
@@ -20,19 +19,6 @@ export function LevitationDemoPage() {
   const distanceLabel = formatValue(levitationDistance)
   const currentLabel = formatValue(levitationCurrent)
   const powerLabel = formatValue(levitationPower)
-
-  const distanceSeries = useRollingTimeSeries(levitationDistance, {
-    maxPoints: 120,
-    minIntervalMs: 400,
-  })
-  const currentSeries = useRollingTimeSeries(levitationCurrent, {
-    maxPoints: 120,
-    minIntervalMs: 400,
-  })
-  const powerSeries = useRollingTimeSeries(levitationPower, {
-    maxPoints: 120,
-    minIntervalMs: 400,
-  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,7 +33,7 @@ export function LevitationDemoPage() {
           title="Levitation Distance"
           value={distanceLabel}
           unit={distanceUnit}
-          chartData={distanceSeries}
+          chartData={series.levitationDistance}
           tooltipLabel="Distance"
           tooltipFormatter={(value) => `${formatValue(value)} ${distanceUnit}`}
           formatTime={formatTime}
@@ -65,14 +51,14 @@ export function LevitationDemoPage() {
           title="Current"
           value={currentLabel}
           unit={currentUnit}
-          chartData={currentSeries}
+          chartData={series.levitationCurrent}
         />
 
         <MetricCard
           title="Power"
           value={powerLabel}
           unit="W"
-          chartData={powerSeries}
+          chartData={series.levitationPower}
         />
       </div>
     </div>

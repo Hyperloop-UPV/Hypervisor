@@ -1,6 +1,5 @@
 import { useOutletContext } from "react-router-dom"
 import type { TelemetryOutletContext } from "@/types/app"
-import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries"
 import { formatTime, formatValue } from "@/lib/demoHelpers"
 import { ChartCard } from "@/components/ChartCard"
 import { MetricCard } from "@/components/MetricCard"
@@ -41,7 +40,7 @@ const StatTile = ({ label, value, unit, formatValue, highlight = false }: {
 )
 
 export function BatteriesDemoPage() {
-  const { data, signals } = useOutletContext<TelemetryOutletContext>()
+  const { data, signals, series } = useOutletContext<TelemetryOutletContext>()
   const {
     dcBusVoltage,
     totalBatteryVoltage,
@@ -52,15 +51,6 @@ export function BatteriesDemoPage() {
   const dcBusLabel = formatValue(dcBusVoltage)
   const totalVoltageLabel = formatValue(totalBatteryVoltage)
   const packs = data?.hvbms ?? []
-
-  const dcBusSeries = useRollingTimeSeries(dcBusVoltage, {
-    maxPoints: 120,
-    minIntervalMs: 500,
-  })
-  const totalVoltageSeries = useRollingTimeSeries(totalBatteryVoltage, {
-    maxPoints: 120,
-    minIntervalMs: 500,
-  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,7 +66,7 @@ export function BatteriesDemoPage() {
             title="DC Bus Voltage"
             value={dcBusLabel}
             unit={dcBusVoltageUnit}
-            chartData={dcBusSeries}
+            chartData={series.dcBusVoltage}
             tooltipLabel="DC Bus"
             tooltipFormatter={(value) => `${formatValue(value)} ${dcBusVoltageUnit}`}
             formatTime={formatTime}
@@ -87,7 +77,7 @@ export function BatteriesDemoPage() {
           title="Total Battery Voltage"
           value={totalVoltageLabel}
           unit={totalBatteryVoltageUnit}
-          chartData={totalVoltageSeries}
+          chartData={series.totalBatteryVoltage}
           chartHeightClassName="h-24"
           accentClassName="text-white"
         />

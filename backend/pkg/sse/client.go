@@ -4,8 +4,8 @@ import (
 	"net/http"
 )
 
-// client represents a single SSE client connection
-type client struct {
+// Client represents a single SSE Client connection
+type Client struct {
 	writer  http.ResponseWriter
 	flusher http.Flusher
 }

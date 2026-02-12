@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
 )
 
 // Encoder is the encoder for data packets. It uses the encoder defined on the value descriptor.

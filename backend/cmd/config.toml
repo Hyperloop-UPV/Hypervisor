@@ -1,4 +1,4 @@
-# DEV MODE CONFIGURATION FILE
+# Hyperloop UPV Hypervisor Configuration File
 
 
 # Control Station general configuration
@@ -12,15 +12,14 @@ boards = [ "HVSCU"]
 
 # ADJ (Architecture Description JSON) Configuration
 [adj]
-branch = "software" # Leave blank when using ADJ as a submodule (like this: "")
+branch = "Test_Hypervisor" # Leave blank when using ADJ as a submodule (like this: "")
 
 # Network Configuration
 [network]
-dev_mode = true # Enable development mode features
+dev_mode = false # Enable development mode features
 
 # Logger Configuration
 [logging]
 time_unit = "us"      # Time unit for log timestamps (ns, us, ms, s)  Default: ns
 logging_path = "."    # Absolute path of the logger
-
 

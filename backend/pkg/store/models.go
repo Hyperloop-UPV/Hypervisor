@@ -3,7 +3,7 @@ package store
 import (
 	"sync"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 	"github.com/rs/zerolog"
 )
 

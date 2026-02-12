@@ -10,14 +10,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/internal/config"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/sse"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/store"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/worker"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/config"
+	"github.com/Hyperloop-UPV/Hypervisor/internal/pod_data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	data_logger "github.com/Hyperloop-UPV/Hypervisor/pkg/logger/data"
+	status_logger "github.com/Hyperloop-UPV/Hypervisor/pkg/logger/status"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/sse"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/store"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/worker"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -85,7 +86,8 @@ func setupRuntimeCPU() func() {
 func setUpLogger(config config.Config) (*logger.Logger, SubloggersMap) {
 
 	var subloggers = SubloggersMap{
-		data_logger.Name: data_logger.NewLogger(),
+		data_logger.Name:   data_logger.NewLogger(),
+		status_logger.Name: status_logger.NewLogger(),
 	}
 
 	logger.ConfigureLogger(config.Logging.TimeUnit, config.Logging.LoggingPath)

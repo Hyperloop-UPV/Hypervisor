@@ -23,7 +23,6 @@ downloads
 audience_static
 
 cmd/adj/
-cmd/config.toml
 
 
 # Test data

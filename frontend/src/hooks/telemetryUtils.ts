@@ -14,25 +14,28 @@ export type MeasurementDictionaryEntry = {
 export type MeasurementDictionary = Record<string, MeasurementDictionaryEntry>
 export type MeasurementUpdate = Record<string, string | null | undefined>
 
+type UnitsByMeasurementKey = Record<string, string | null | undefined>
+
+type UnknownRecord = Record<string, unknown>
+
 const measurementKey = (measurementId: string, boardId: number) =>
   `${boardId}:${measurementId}`
 
-const isObjectRecord = (payload: unknown): payload is Record<string, unknown> =>
+const isRecord = (payload: unknown): payload is UnknownRecord =>
   typeof payload === "object" && payload !== null && !Array.isArray(payload)
 
 export const isMeasurementDictionary = (
   payload: unknown,
 ): payload is MeasurementDictionary => {
-  if (!isObjectRecord(payload)) return false
+  if (!isRecord(payload)) return false
   return Object.values(payload).every((value) => {
-    if (!isObjectRecord(value)) return false
-    const record = value as { measurement_id?: unknown; board_id?: unknown }
-    return typeof record.measurement_id === "string" && typeof record.board_id === "number"
+    if (!isRecord(value)) return false
+    return typeof value.measurement_id === "string" && typeof value.board_id === "number"
   })
 }
 
 export const isMeasurementUpdate = (payload: unknown): payload is MeasurementUpdate => {
-  if (!isObjectRecord(payload)) return false
+  if (!isRecord(payload)) return false
   return Object.values(payload).every(
     (value) => value === null || value === undefined || typeof value === "string",
   )
@@ -46,25 +49,35 @@ const parseTelemetryValue = (value: string | null | undefined) => {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-const normalizeValue = (value: string | null | undefined) => {
+const normalizeTelemetryValue = (value: string | null | undefined) => {
   const parsed = parseTelemetryValue(value)
   if (parsed === null) return null
   return parsed === -1 ? null : parsed
 }
 
-export const buildTelemetryData = (dictionary: MeasurementDictionary): TelemetryData => {
+export const hasMeasurementValues = (dictionary: MeasurementDictionary) =>
+  Object.values(dictionary).some(
+    (entry) => normalizeTelemetryValue(entry?.value) !== null,
+  )
+
+const buildValueMap = (dictionary: MeasurementDictionary) => {
   const values = new Map<string, number | null>()
-  const units: Record<string, string | null | undefined> = {}
+  const units: UnitsByMeasurementKey = {}
 
   Object.values(dictionary).forEach((entry) => {
     if (typeof entry?.measurement_id !== "string" || typeof entry?.board_id !== "number") return
     const key = measurementKey(entry.measurement_id, entry.board_id)
-    values.set(key, normalizeValue(entry.value))
+    values.set(key, normalizeTelemetryValue(entry.value))
     if (entry.display_units !== undefined) {
       units[key] = entry.display_units
     }
   })
 
+  return { values, units }
+}
+
+const buildTelemetryData = (dictionary: MeasurementDictionary): TelemetryData => {
+  const { values, units } = buildValueMap(dictionary)
   const getValue = (measurementId: string, boardId: number) =>
     values.get(measurementKey(measurementId, boardId)) ?? null
 
@@ -73,6 +86,18 @@ export const buildTelemetryData = (dictionary: MeasurementDictionary): Telemetry
     ...buildBatteryData(getValue),
     unitsByMeasurementKey: units,
   }
+}
+
+export const buildTelemetryFromInitialDictionary = (
+  dictionary: MeasurementDictionary,
+): TelemetryData => buildTelemetryData(dictionary)
+
+export const applyUpdateAndBuildTelemetry = (
+  dictionary: MeasurementDictionary,
+  updates: MeasurementUpdate,
+): TelemetryData => {
+  applyMeasurementUpdate(dictionary, updates)
+  return buildTelemetryData(dictionary)
 }
 
 export const getTelemetrySignals = (data: TelemetryData | null) => {
@@ -101,7 +126,7 @@ export const getTelemetrySignals = (data: TelemetryData | null) => {
   }
 }
 
-export const applyMeasurementUpdate = (
+const applyMeasurementUpdate = (
   dictionary: MeasurementDictionary,
   updates: MeasurementUpdate,
 ) => {

@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	loggerHandler "github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	loggerHandler "github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 )
 
 /*********

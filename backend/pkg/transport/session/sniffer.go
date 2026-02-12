@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/network"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/network/sniffer"
 	"github.com/rs/zerolog"
 )
 

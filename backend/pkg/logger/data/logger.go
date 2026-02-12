@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	loggerHandler "github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	loggerbase "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/base"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/file"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
+	loggerHandler "github.com/Hyperloop-UPV/Hypervisor/pkg/logger"
+	loggerbase "github.com/Hyperloop-UPV/Hypervisor/pkg/logger/base"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger/file"
+	"github.com/Hyperloop-UPV/Hypervisor/pkg/transport/packet/data"
 )
 
 type loggerAccess string

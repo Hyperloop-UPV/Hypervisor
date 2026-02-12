@@ -4,7 +4,7 @@
 # Control Station general configuration
 [app]
 addr = "0.0.0.0:80" # Where app will listen for incoming connections
-static_path = "./hv-front" 
+static_path = "./frontend/dist" # Path to the frontend static files (relative to the backend/cmd directory)
 
 # Vehicle Configuration
 [vehicle]

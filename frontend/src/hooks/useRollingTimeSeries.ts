@@ -5,9 +5,10 @@ interface RollingSeriesPoint {
   value: number | null
 }
 
-interface RollingSeriesPointWithIndex extends RollingSeriesPoint {
+export interface RollingSeriesPointWithIndex extends RollingSeriesPoint {
   idx: number
 }
+
 
 interface RollingSeriesOptions {
   minIntervalMs?: number

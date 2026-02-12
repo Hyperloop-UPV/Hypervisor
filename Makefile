@@ -5,7 +5,7 @@
 # License: MIT
 # =====================================
 
-APP_NAME := backend
+APP_NAME := hypervisor
 RELEASE_DIR := release
 FRONTEND_DIR := frontend
 BACKEND_DIR := backend

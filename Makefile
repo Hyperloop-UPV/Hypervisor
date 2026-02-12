@@ -1,3 +1,10 @@
+# =====================================
+# Project: Hypervisor Monitoring App
+# Organization: Hyperloop UPV
+# Author: Javier Ribal del Río & Lola Castelló
+# License: MIT
+# =====================================
+
 APP_NAME := backend
 RELEASE_DIR := release
 FRONTEND_DIR := frontend

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
@@ -57,6 +58,7 @@ func (sublogger *Logger) Start() error {
 }
 
 func (sublogger *Logger) createFile() (*os.File, error) {
+
 	filename := path.Join(
 		"logger",
 		logger.Timestamp.Format(logger.TimestampFormat),
@@ -64,7 +66,11 @@ func (sublogger *Logger) createFile() (*os.File, error) {
 		"status.csv",
 	)
 
-	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
+	// Mask to give permissions to the created file to everyone (including the parent directories)
+	oldMask := syscall.Umask(0)
+	defer syscall.Umask(oldMask)
+
+	err := os.MkdirAll(path.Dir(filename), 0777)
 	if err != nil {
 		return nil, logger.ErrCreatingAllDir{
 			Name:      Name,

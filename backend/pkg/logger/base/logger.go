@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
@@ -59,7 +60,11 @@ func (sublogger *BaseLogger) CreateFile(filename string) (*os.File, error) {
 	// Includes the direcory specified by the user
 	baseFilename := path.Join(loggerHandler.BasePath, filename)
 
-	err := os.MkdirAll(path.Dir(baseFilename), os.ModePerm)
+	// Mask to give permissions to the created file to everyone (including the parent directories)
+	oldMask := syscall.Umask(0)
+	defer syscall.Umask(oldMask)
+
+	err := os.MkdirAll(path.Dir(baseFilename), 0777)
 	if err != nil {
 		return nil, loggerHandler.ErrCreatingAllDir{
 			Name:      sublogger.Name,
@@ -68,7 +73,17 @@ func (sublogger *BaseLogger) CreateFile(filename string) (*os.File, error) {
 		}
 	}
 
-	return os.Create(path.Join(baseFilename))
+	f, err := os.Create(baseFilename)
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.Chmod(baseFilename, 0777)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }
 
 // Create a base Logger with default values

@@ -43,7 +43,6 @@ type MeasurementBase struct {
 	MeasuramentID string   `json:"measurement_id"`
 	BoardID       uint16   `json:"board_id"`
 	DisplayUnits  string   `json:"display_units"`
-	Value         string   `json:"value"`
 	Type          string   `json:"type"`
 	EnumValues    []string `json:"enumValues,omitempty"`
 }

@@ -103,8 +103,9 @@ func setUpHypervisorWorker(
 	ctx context.Context,
 	storage *store.Store,
 	hub *sse.Hub,
+	cfg config.Config,
 ) {
-	w := worker.New(300*time.Millisecond, func(ctx context.Context) {
+	w := worker.New(time.Duration(cfg.App.PeriodicInterval)*time.Millisecond, func(ctx context.Context) {
 
 		// Gets the latest data
 		state := storage.SnapshotAndReset()

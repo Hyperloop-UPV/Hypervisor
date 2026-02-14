@@ -6,6 +6,7 @@
 addr = "0.0.0.0:80" # Where app will listen for incoming connections
 hypervisor_addr = "192.168.0.23" # IP address of the Hypervisor (where the backend will send commands and receive telemetry data)
 static_path = "./frontend/dist" # Path to the frontend static files (relative to the backend/cmd directory)
+periodic_interval = 100 # Interval in milliseconds for periodic tasks (like fetching telemetry data)
 
 # Vehicle Configuration
 [vehicle]

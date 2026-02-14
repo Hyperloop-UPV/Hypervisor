@@ -54,6 +54,7 @@ func configureHttpServer(
 	return srv
 }
 
+// Configuration to redirect to react router
 func HandleSPA(staticPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

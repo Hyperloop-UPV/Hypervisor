@@ -8,6 +8,7 @@ import (
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/logger/status"
 )
 
+// Broadcast to all the connected clients
 func (h *Hub) Broadcast(data []byte) {
 
 	h.mutex.Lock()

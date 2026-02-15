@@ -18,6 +18,7 @@ type Hub struct {
 	initialMessage []byte
 	trace          zerolog.Logger
 	statusLogger   abstraction.Logger
+	startTime      time.Time
 }
 
 // NewHub creates a new Hub
@@ -27,7 +28,13 @@ func NewHub(trace zerolog.Logger, initialMessage []byte, statusLogger abstractio
 		initialMessage: initialMessage,
 		trace:          trace,
 		statusLogger:   statusLogger,
+		startTime:      time.Now(),
 	}
+}
+
+// Returns the time since the hub was created
+func (h *Hub) Uptime() time.Duration {
+	return time.Since(h.startTime)
 }
 
 func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {

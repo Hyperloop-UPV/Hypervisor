@@ -5,8 +5,10 @@ import (
 )
 
 type App struct {
-	Addr       string `toml:"addr"`
-	StaticPath string `toml:"static_path"`
+	Addr             string `toml:"addr"`
+	StaticPath       string `toml:"static_path"`
+	HypervisorAddr   string `toml:"hypervisor_addr"`
+	PeriodicInterval int    `toml:"periodic_interval"`
 }
 
 type Adj struct {

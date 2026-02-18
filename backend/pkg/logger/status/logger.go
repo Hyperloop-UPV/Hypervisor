@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/Hyperloop-UPV/Hypervisor/pkg/abstraction"
@@ -23,10 +24,11 @@ type Logger struct {
 }
 
 type Record struct {
-	IP             string
-	UA             string
-	ConnectionType string
-	Timestamp      time.Time
+	IP               string
+	UA               string
+	ConnectionType   string
+	ConnectedDevices int
+	Timestamp        time.Time
 }
 
 func (*Record) Name() abstraction.LoggerName {
@@ -57,6 +59,7 @@ func (sublogger *Logger) Start() error {
 }
 
 func (sublogger *Logger) createFile() (*os.File, error) {
+
 	filename := path.Join(
 		"logger",
 		logger.Timestamp.Format(logger.TimestampFormat),
@@ -64,7 +67,11 @@ func (sublogger *Logger) createFile() (*os.File, error) {
 		"status.csv",
 	)
 
-	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
+	// Mask to give permissions to the created file to everyone (including the parent directories)
+	oldMask := syscall.Umask(0)
+	defer syscall.Umask(oldMask)
+
+	err := os.MkdirAll(path.Dir(filename), 0777)
 	if err != nil {
 		return nil, logger.ErrCreatingAllDir{
 			Name:      Name,
@@ -99,6 +106,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		statusRecord.IP,
 		statusRecord.UA,
 		statusRecord.ConnectionType,
+		fmt.Sprintf("%d", statusRecord.ConnectedDevices),
 		statusRecord.Timestamp.Format(time.RFC3339),
 	})
 	sublogger.writer.Flush()

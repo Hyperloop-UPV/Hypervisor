@@ -159,7 +159,6 @@ func (s *Store) initializeMeasurementBase(adj adj_module.ADJ, packetIDToBoard ma
 					BoardID:       uint16(boardIDInt),
 					DisplayUnits:  adjMeasurementBase.DisplayUnits,
 					Type:          adjMeasurementBase.Type,
-					Value:         "-1",
 				}
 
 				// If the measurement is of enum type, add enum values

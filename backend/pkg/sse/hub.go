@@ -1,7 +1,6 @@
 package sse
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -13,83 +12,188 @@ import (
 
 // Hub maintains the set of active clients and broadcasts messages to the clients.
 type Hub struct {
-	mutex          sync.Mutex
+	mu             sync.RWMutex
 	clients        map[*Client]struct{} // set of clients
 	initialMessage []byte
+	register       chan *Client
+	unregister     chan *Client
+	broadcast      chan []byte
 	trace          zerolog.Logger
 	statusLogger   abstraction.Logger
 }
 
 // NewHub creates a new Hub
 func NewHub(trace zerolog.Logger, initialMessage []byte, statusLogger abstraction.Logger) *Hub {
-	return &Hub{
-		clients:        make(map[*Client]struct{}),
+	h := &Hub{
+		clients: make(map[*Client]struct{}),
+
 		initialMessage: initialMessage,
 		trace:          trace,
 		statusLogger:   statusLogger,
+		register:       make(chan *Client),
+		unregister:     make(chan *Client),
+		broadcast:      make(chan []byte, 1), // pequeño buffer
+	}
+	go h.run()
+	return h
+}
+
+// run defines the main behaviour of a broker
+func (h *Hub) run() {
+	for {
+		select {
+		// Register new client
+		case c := <-h.register:
+			h.mu.Lock()
+			h.clients[c] = struct{}{}
+			count := len(h.clients)
+			h.mu.Unlock()
+
+			// Trace conexión
+			h.trace.Info().
+				Str("ip", c.ip).
+				Str("ua", c.ua).
+				Int("clients", count).
+				Msg("SSE client connected")
+
+			// Status logger
+			h.statusLogger.PushRecord(&status.Record{
+				IP:               c.ip,
+				UA:               c.ua,
+				ConnectionType:   "CONNECTION",
+				ConnectedDevices: count,
+				Timestamp:        time.Now(),
+			})
+
+			// Mensaje inicial
+			if h.initialMessage != nil {
+				select {
+				case c.send <- h.initialMessage:
+				default:
+				}
+			}
+
+		// Un register
+		case c := <-h.unregister:
+
+			// Remove
+			h.mu.Lock()
+			if _, ok := h.clients[c]; ok {
+				delete(h.clients, c)
+				close(c.send)
+			}
+			count := len(h.clients)
+			h.mu.Unlock()
+
+			// Log disconnection
+			h.trace.Info().
+				Str("ip", c.ip).
+				Str("ua", c.ua).
+				Int("clients", count).
+				Msg("SSE client disconnected")
+
+			h.statusLogger.PushRecord(&status.Record{
+				IP:               c.ip,
+				UA:               c.ua,
+				ConnectionType:   "DISCONNECTION",
+				ConnectedDevices: count,
+				Timestamp:        time.Now(),
+			})
+
+		case msg := <-h.broadcast:
+			h.mu.RLock()
+			for c := range h.clients {
+				select {
+				case c.send <- msg:
+				default:
+					// keep-latest policy
+					select {
+					case <-c.send:
+					default:
+					}
+					select {
+					case c.send <- msg:
+					default:
+						go func(cc *Client) { h.unregister <- cc }(c)
+					}
+				}
+			}
+			h.mu.RUnlock()
+		}
 	}
 }
 
 func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Headers CORS
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	f, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-
-		// logger to log error
-		h.trace.Error().Msg("Streaming unsupported")
-		return
-	}
-
-	// Start connection
-	fmt.Fprint(w, ": init\n\n")
-	flusher.Flush()
-
 	c := &Client{
 		writer:  w,
-		flusher: flusher,
+		flusher: f,
+		req:     r,
+		send:    make(chan []byte, 1), // keep-latest
+		ip:      r.RemoteAddr,
+		ua:      r.UserAgent(),
 	}
 
-	// After sending intial message we regdister the client
-	h.mutex.Lock()
-	h.clients[c] = struct{}{}
-	h.mutex.Unlock()
+	// Send initial message
 
-	// Send initial welcome message before registering client
-	fmt.Fprintf(c.writer, "data: %s\n\n", h.initialMessage)
-	c.flusher.Flush()
+	if h.initialMessage != nil {
+		if _, err := w.Write([]byte("data: ")); err != nil {
+			return
+		}
+		if _, err := w.Write(h.initialMessage); err != nil {
+			return
+		}
+		if _, err := w.Write([]byte("\n\n")); err != nil {
+			return
+		}
+		f.Flush()
+	}
 
-	// Log connection to trace
-	h.trace.Debug().Msg("New client connected")
+	h.register <- c
+	defer func() { h.unregister <- c }()
 
-	// from clients set get number of clients
+	ctx := r.Context()
 
-	// Log connection to status logger
-	h.statusLogger.PushRecord(&status.Record{
-		IP:               r.RemoteAddr,
-		UA:               r.Header.Get("User-Agent"),
-		ConnectionType:   "CONNECTION",
-		ConnectedDevices: h.ClientCount(),
-		Timestamp:        time.Now(),
-	})
+	for {
+		select {
+		case msg, ok := <-c.send:
+			if !ok {
+				return
+			}
+			// SSE: data: <payload>\n\n
+			_, err := c.writer.Write([]byte("data: "))
+			if err != nil {
+				return
+			}
+			_, err = c.writer.Write(msg)
+			if err != nil {
+				return
+			}
+			_, err = c.writer.Write([]byte("\n\n"))
+			if err != nil {
+				return
+			}
+			c.flusher.Flush()
 
-	// Wait until connection is colosed
-	<-r.Context().Done()
-
-	h.mutex.Lock()
-	delete(h.clients, c)
-	h.mutex.Unlock()
+		case <-ctx.Done():
+			return
+		}
+	}
 }
 
 // ClientCount returns the number of clients conected
 func (h *Hub) ClientCount() int {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
+	h.mu.Lock()
+	defer h.mu.Unlock()
 
 	return len(h.clients)
 }

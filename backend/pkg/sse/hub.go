@@ -67,12 +67,15 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Log connection to trace
 	h.trace.Debug().Msg("New client connected")
 
+	// from clients set get number of clients
+
 	// Log connection to status logger
 	h.statusLogger.PushRecord(&status.Record{
-		IP:             r.RemoteAddr,
-		UA:             r.Header.Get("User-Agent"),
-		ConnectionType: "CONNECTION",
-		Timestamp:      time.Now(),
+		IP:               r.RemoteAddr,
+		UA:               r.Header.Get("User-Agent"),
+		ConnectionType:   "CONNECTION",
+		ConnectedDevices: h.ClientCount(),
+		Timestamp:        time.Now(),
 	})
 
 	// Wait until connection is colosed

@@ -33,10 +33,11 @@ func (h *Hub) Broadcast(data []byte) {
 			fmt.Printf("Client disconnected: %v\n", err)
 
 			h.statusLogger.PushRecord(&status.Record{
-				IP:             c.writer.Header().Get("X-Forwarded-For"),
-				UA:             c.writer.Header().Get("User-Agent"),
-				ConnectionType: "DISCONNECTION",
-				Timestamp:      time.Now(),
+				IP:               c.writer.Header().Get("X-Forwarded-For"),
+				UA:               c.writer.Header().Get("User-Agent"),
+				ConnectionType:   "DISCONNECTION",
+				ConnectedDevices: h.ClientCount() - 1, // -1 because the client is already disconnected
+				Timestamp:        time.Now(),
 			})
 
 			h.mutex.Lock()

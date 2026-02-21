@@ -1,16 +1,12 @@
 # Hyperloop UPV Hypervisor Configuration File
 
 
-# Control Station general configuration
+# Hypervisor Station general configuration
 [app]
 addr = "0.0.0.0:80" # Where app will listen for incoming connections
 hypervisor_addr = "192.168.0.23" # IP address of the Hypervisor (where the backend will send commands and receive telemetry data)
 static_path = "./frontend/dist" # Path to the frontend static files (relative to the backend/cmd directory)
 periodic_interval = 250 # Interval in milliseconds for periodic tasks (like fetching telemetry data)
-
-# Vehicle Configuration
-[vehicle]
-boards = [ "LCU" , "HVBMS"]
 
 # ADJ (Architecture Description JSON) Configuration
 [adj]
@@ -19,6 +15,7 @@ branch = "Test_Hypervisor" # Leave blank when using ADJ as a submodule (like thi
 # Network Configuration
 [network]
 dev_mode = false # Enable development mode features
+sniffer_ips = [ "192.168.0.9" , "192.168.0.10" ] # List of IP addresses of devices to sniff on the network  (used when having multiple backend)
 
 # Logger Configuration
 [logging]

@@ -69,7 +69,7 @@ func main() {
 		trace.Fatal().Err(err).Msg("creating podData")
 	}
 	// <--- logger --->
-	loggerHandler, _ := setUpLogger(config)
+	loggerHandler, _ := setUpLogger(config) // There is always a log of at least the status of the app regarding to connections
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
@@ -134,10 +134,6 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-
-	// Start board logger if required
-
-	loggerHandler.Start()
 
 	// Wait for interrupt signal to gracefully shutdown the backend
 	interrupt := make(chan os.Signal, 1)

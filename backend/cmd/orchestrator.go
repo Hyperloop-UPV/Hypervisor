@@ -93,6 +93,15 @@ func setUpLogger(config config.Config) (*logger.Logger, SubloggersMap) {
 	logger.ConfigureLogger(config.Logging.TimeUnit, config.Logging.LoggingPath)
 	loggerHandler := logger.NewLogger(subloggers, trace.Logger)
 
+	// start
+	if !*loggerFlag {
+		subloggers[status_logger.Name].Start()
+	} else {
+
+		loggerHandler.Start()
+
+	}
+
 	return loggerHandler, subloggers
 
 }

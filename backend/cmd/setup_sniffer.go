@@ -34,7 +34,19 @@ func configureSnifferTransport(
 		boardIps = append(boardIps, net.ParseIP(adj.Info.Addresses[boardName]))
 	}
 
-	filter := getFilter(boardIps, net.ParseIP(adj.Info.Addresses[BACKEND]), adj.Info.Ports[UDP])
+	// Parse all posible boards of the
+
+	ipsToSniff := make([]net.IP, 0, len(config.Network.SnifferIPs))
+
+	for _, backIP := range config.Network.SnifferIPs {
+		ip := net.ParseIP(backIP)
+		if ip != nil {
+			ipsToSniff = append(ipsToSniff, ip)
+		} else {
+			trace.Fatal().Str("ip", backIP).Msg("invalid IP address in sniffer_ips")
+		}
+	}
+	filter := getFilter(boardIps, ipsToSniff, adj.Info.Ports[UDP])
 	trace.Warn().Str("filter", filter).Msg("filter")
 	err = source.SetBPFFilter(filter)
 	if err != nil {
@@ -87,9 +99,9 @@ func selectDev(adjAddr map[string]string, conf config.Config) (pcap.Interface, e
 
 }
 
-func getFilter(boardAddrs []net.IP, backendAddr net.IP, udpPort uint16) string {
+func getFilter(boardAddrs []net.IP, backendAddrs []net.IP, udpPort uint16) string {
 	ipipFilter := getIPIPfilter()
-	udpFilter := getUDPFilter(boardAddrs, backendAddr, udpPort)
+	udpFilter := getUDPFilter(boardAddrs, backendAddrs, udpPort)
 
 	filter := fmt.Sprintf("(%s) or (%s)", ipipFilter, udpFilter)
 
@@ -101,17 +113,47 @@ func getIPIPfilter() string {
 	return "ip[9] == 4"
 }
 
-func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
-	udpPort := fmt.Sprintf("udp port %d", port) // TODO use proper ports for the filter
+func getUDPFilter(addrs []net.IP, backendAddrs []net.IP, port uint16) string {
+	udpPort := fmt.Sprintf("udp port %d", port)
+
+	// Source addresses
 	srcUdpAddrs := common.Map(addrs, func(addr net.IP) string {
-		return fmt.Sprintf("(src host %s)", addr)
+		return fmt.Sprintf("(src host %s)", addr.String())
 	})
+
+	// Destination addresses (frontend)
 	dstUdpAddrs := common.Map(addrs, func(addr net.IP) string {
-		return fmt.Sprintf("(dst host %s)", addr)
+		return fmt.Sprintf("(dst host %s)", addr.String())
+	})
+
+	// Backend destination addresses
+	backendDstAddrs := common.Map(backendAddrs, func(addr net.IP) string {
+		return fmt.Sprintf("(dst host %s)", addr.String())
 	})
 
 	srcUdpAddrsStr := strings.Join(srcUdpAddrs, " or ")
 	dstUdpAddrsStr := strings.Join(dstUdpAddrs, " or ")
+	backendDstAddrsStr := strings.Join(backendDstAddrs, " or ")
 
-	return fmt.Sprintf("(%s) and (%s) and (%s or (dst host %s))", udpPort, srcUdpAddrsStr, dstUdpAddrsStr, backendAddr)
+	return fmt.Sprintf(
+		"(%s) and (%s) and (%s or %s)",
+		udpPort,
+		srcUdpAddrsStr,
+		dstUdpAddrsStr,
+		backendDstAddrsStr,
+	)
+
+	//return fmt.Sprintf("(%s) and (%s) and (%s or (dst host %s))", udpPort, srcUdpAddrsStr, dstUdpAddrsStr, backendAddr)
+
+	//
+	/*return fmt.Sprintf(
+		"(%s) and (%s) and (%s or (dst host %s) or (dst host %s))",
+		udpPort,
+		srcUdpAddrsStr,
+		dstUdpAddrsStr,
+		"192.168.0.9",
+		"192.168.0.10",
+	)
+
+	*/
 }

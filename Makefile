@@ -1,7 +1,7 @@
 # =====================================
 # Project: Hypervisor Monitoring App
 # Organization: Hyperloop UPV
-# Author: Javier Ribal del Río & Lola Castelló
+# Author: Javier Ribal del Río & Lola Castelló Puchades
 # License: MIT
 # =====================================
 
@@ -10,9 +10,9 @@ RELEASE_DIR := release
 FRONTEND_DIR := frontend
 BACKEND_DIR := backend
 
-.PHONY: build frontend backend prepare copy-config copy-frontend clean
+.PHONY: build frontend backend prepare copy-config copy-frontend copy-setup clean
 
-build: frontend prepare backend copy-config copy-frontend
+build: frontend prepare backend copy-config copy-frontend copy-setup
 	@echo "Release ready"
 
 # -------------------------
@@ -57,6 +57,11 @@ copy-config:
 copy-frontend:
 	@echo "Copying frontend..."
 	cp -r $(FRONTEND_DIR)/dist $(RELEASE_DIR)/frontend/
+
+
+copy-setup:
+	@echo "Copy setup_hypervisor.sh"
+	cp ./setup_hypervisor.sh $(RELEASE_DIR)/
 
 # -------------------------
 # Clean

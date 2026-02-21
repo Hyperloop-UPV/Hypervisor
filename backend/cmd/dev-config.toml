@@ -19,6 +19,7 @@ branch = "software" # Leave blank when using ADJ as a submodule (like this: "")
 # Network Configuration
 [network]
 dev_mode = true # Enable development mode features
+sniffer_ips = [ "192.168.0.9" , "192.168.0.10" ] # List of IP addresses of devices to sniff on the network  (used when having multiple backend)
 
 # Logger Configuration
 [logging]

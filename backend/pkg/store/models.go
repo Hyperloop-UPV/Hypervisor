@@ -61,3 +61,9 @@ type HypervisorMonitoring map[BoardIDString]map[PacketIDString][]data.ValueName
 type BoardIDEquivalences map[BoardIDString]map[PacketIDString]map[data.ValueName]AutogenerateID
 
 type PacketIDEquivalences map[PacketIDString]map[data.ValueName]AutogenerateID
+
+// TelemetryPayload is what is send in each update
+type TelemetryPayload struct {
+	UptimeMS int64              `json:"uptime_ms"` // milliseconds
+	State    MeasurementUpdates `json:"state"`
+}

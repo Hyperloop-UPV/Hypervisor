@@ -20,6 +20,7 @@ type Hub struct {
 	broadcast      chan []byte
 	trace          zerolog.Logger
 	statusLogger   abstraction.Logger
+	startTime      time.Time
 }
 
 // NewHub creates a new Hub

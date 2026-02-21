@@ -123,7 +123,19 @@ func setUpHypervisorWorker(
 		if len(state) == 0 {
 			return
 		}
-		data, err := json.Marshal(state)
+
+		// Add uptime to the state
+
+		uptime := hub.Uptime()
+
+		payload := &store.TelemetryPayload{
+
+			UptimeMS: uptime.Milliseconds(),
+
+			State: state,
+		}
+
+		data, err := json.Marshal(payload)
 		if err != nil {
 			trace.Error().Err(err).Msg("marshal telemetry")
 			return

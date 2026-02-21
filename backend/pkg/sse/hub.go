@@ -49,7 +49,7 @@ func (h *Hub) run() {
 			count := len(h.clients)
 			h.mu.Unlock()
 
-			// Trace conexión
+			// Trace connection
 			h.trace.Info().
 				Str("ip", c.ip).
 				Str("ua", c.ua).
@@ -65,15 +65,7 @@ func (h *Hub) run() {
 				Timestamp:        time.Now(),
 			})
 
-			// Mensaje inicial
-			if h.initialMessage != nil {
-				select {
-				case c.send <- h.initialMessage:
-				default:
-				}
-			}
-
-		// Un register
+		// Unregister
 		case c := <-h.unregister:
 
 			// Remove

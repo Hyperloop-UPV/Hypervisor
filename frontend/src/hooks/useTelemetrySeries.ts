@@ -1,5 +1,5 @@
-import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries"
-import type { TelemetrySignals } from "@/hooks/useTelemetry"
+import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries";
+import type { TelemetrySignals } from "@/hooks/useTelemetry";
 
 const SERIES_SAMPLE_CONFIG = {
   levitationDistance: 400,
@@ -16,25 +16,28 @@ export const useTelemetrySeries = (
   // All chart sampling rates live in one map so tuning the dashboard cadence
   // does not require hunting through repeated hook calls.
   const levitationDistance = useRollingTimeSeries(signals.levitationDistance, {
-    minIntervalMs: SERIES_SAMPLE_CONFIG.levitationDistance,
-    sampleKey: connectionUptimeSeconds,
-  })
+    minIntervalMs: 400,
+    sampleKey: lastUpdatedAt,
+  });
   const levitationCurrent = useRollingTimeSeries(signals.levitationCurrent, {
-    minIntervalMs: SERIES_SAMPLE_CONFIG.levitationCurrent,
-    sampleKey: connectionUptimeSeconds,
-  })
+    minIntervalMs: 400,
+    sampleKey: lastUpdatedAt,
+  });
   const levitationPower = useRollingTimeSeries(signals.levitationPower, {
-    minIntervalMs: SERIES_SAMPLE_CONFIG.levitationPower,
-    sampleKey: connectionUptimeSeconds,
-  })
+    minIntervalMs: 400,
+    sampleKey: lastUpdatedAt,
+  });
   const dcBusVoltage = useRollingTimeSeries(signals.dcBusVoltage, {
-    minIntervalMs: SERIES_SAMPLE_CONFIG.dcBusVoltage,
-    sampleKey: connectionUptimeSeconds,
-  })
-  const totalBatteryVoltage = useRollingTimeSeries(signals.totalBatteryVoltage, {
-    minIntervalMs: SERIES_SAMPLE_CONFIG.totalBatteryVoltage,
-    sampleKey: connectionUptimeSeconds,
-  })
+    minIntervalMs: 500,
+    sampleKey: lastUpdatedAt,
+  });
+  const totalBatteryVoltage = useRollingTimeSeries(
+    signals.totalBatteryVoltage,
+    {
+      minIntervalMs: 500,
+      sampleKey: lastUpdatedAt,
+    },
+  );
 
   return {
     levitationDistance,
@@ -42,5 +45,5 @@ export const useTelemetrySeries = (
     levitationPower,
     dcBusVoltage,
     totalBatteryVoltage,
-  }
-}
+  };
+};

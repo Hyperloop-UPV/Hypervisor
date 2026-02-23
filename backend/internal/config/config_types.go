@@ -16,7 +16,8 @@ type Adj struct {
 }
 
 type Network struct {
-	DevMode bool `toml:"dev_mode"`
+	DevMode    bool     `toml:"dev_mode"`
+	SnifferIPs []string `toml:"sniffer_ips"`
 }
 
 type Logging struct {

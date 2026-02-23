@@ -24,10 +24,11 @@ type Logger struct {
 }
 
 type Record struct {
-	IP             string
-	UA             string
-	ConnectionType string
-	Timestamp      time.Time
+	IP               string
+	UA               string
+	ConnectionType   string
+	ConnectedDevices int
+	Timestamp        time.Time
 }
 
 func (*Record) Name() abstraction.LoggerName {
@@ -105,6 +106,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		statusRecord.IP,
 		statusRecord.UA,
 		statusRecord.ConnectionType,
+		fmt.Sprintf("%d", statusRecord.ConnectedDevices),
 		statusRecord.Timestamp.Format(time.RFC3339),
 	})
 	sublogger.writer.Flush()

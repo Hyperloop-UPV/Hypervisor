@@ -27,7 +27,7 @@ export function MetricCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-2">
-        <div className={`text-3xl sm:text-4xl font-black ${accentClassName}`}>
+        <div className={`text-3xl font-black sm:text-4xl ${accentClassName}`}>
           {value} <span className="text-sm text-white/60">{unit}</span>
         </div>
         {chartData ? (

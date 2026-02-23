@@ -2,16 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { TelemetryData } from "../types/telemetry";
 import type {
   MeasurementDictionary,
-  MeasurementUpdate,
 } from "@/hooks/telemetryUtils";
 import {
   applyUpdateAndBuildTelemetry,
   buildTelemetryFromInitialDictionary,
+  getConnectionUptimeSeconds,
   getTelemetrySignals,
   hasMeasurementValues,
   isMeasurementDictionary,
-  isMeasurementUpdate,
-  buildTimestamp,
+  normalizeMeasurementUpdate,
 } from "@/hooks/telemetryUtils";
 
 export type TelemetrySignals = ReturnType<typeof getTelemetrySignals>;
@@ -21,28 +20,30 @@ export const useTelemetry = (url: string) => {
   const [status, setStatus] = useState<"connecting" | "open" | "closed">(
     "connecting",
   );
-  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
+  const [connectionUptimeSeconds, setConnectionUptimeSeconds] = useState<number | null>(null);
+  // We keep the dictionary in a ref so incoming SSE updates can mutate it
+  // without triggering re-renders for every key assignment.
   const dictionaryRef = useRef<MeasurementDictionary>({});
 
   useEffect(() => {
     const source = new EventSource(url);
 
-    const handleInitialDictionary = (
-      payload: MeasurementDictionary,
-      now: number,
-    ) => {
+    const handleInitialDictionary = (payload: MeasurementDictionary) => {
       // Initial dictionary payload: defines all measurement ids/units and may or may not include values.
       dictionaryRef.current = { ...payload };
       setData(buildTelemetryFromInitialDictionary(dictionaryRef.current));
       if (hasMeasurementValues(dictionaryRef.current)) {
-        setLastUpdatedAt(Date.now());
+        setConnectionUptimeSeconds(0);
       }
     };
 
-    const handleUpdate = (payload: MeasurementUpdate, now: number) => {
+    const handleUpdate = (rawPayload: unknown) => {
+      const payload = normalizeMeasurementUpdate(rawPayload);
+      if (!payload) return;
+
       // Incremental update payload: just values keyed by measurement id.
       setData(applyUpdateAndBuildTelemetry(dictionaryRef.current, payload));
-      setLastUpdatedAt(buildTimestamp(payload));
+      setConnectionUptimeSeconds(getConnectionUptimeSeconds(payload));
     };
 
     source.onopen = () => setStatus("open");
@@ -53,16 +54,16 @@ export const useTelemetry = (url: string) => {
     };
 
     source.onmessage = (event) => {
+      // Backends can send either a full dictionary (first payload)
+      // or incremental value updates (subsequent payloads).
       const payload = JSON.parse(event.data);
-      const now = Date.now();
 
       if (isMeasurementDictionary(payload)) {
-        handleInitialDictionary(payload, now);
+        handleInitialDictionary(payload);
         return;
       }
 
-      if (!isMeasurementUpdate(payload)) return;
-      handleUpdate(payload, now);
+      handleUpdate(payload);
     };
 
     return () => {
@@ -73,5 +74,5 @@ export const useTelemetry = (url: string) => {
 
   const signals = useMemo(() => getTelemetrySignals(data), [data]);
 
-  return { data, status, lastUpdatedAt, signals };
+  return { data, status, connectionUptimeSeconds, signals };
 };

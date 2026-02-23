@@ -21,13 +21,13 @@ export function PodDistanceVisualizer({ distance, unit, label }: PodDistanceVisu
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-          <div className="w-full sm:w-56 shrink-0">
-            <div className="relative h-40 rounded-xl border border-white/10 bg-[#1a2035] overflow-hidden">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="w-full shrink-0 sm:w-56">
+            <div className="relative h-40 overflow-hidden rounded-xl border border-white/10 bg-[#1a2035]">
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-4 h-3 w-10 rounded-full bg-[#EDEEF0]/60 shadow-[0_0_10px_rgba(255,255,255,0.2)]" />
+              <div className="absolute bottom-4 left-1/2 h-3 w-10 -translate-x-1/2 rounded-full bg-[#EDEEF0]/60 shadow-[0_0_10px_rgba(255,255,255,0.2)]" />
               <div
-                className="absolute left-1/2 -translate-x-1/2 h-2 w-12 rounded-full bg-[#FF7F24] shadow-[0_0_12px_rgba(255,127,36,0.7)]"
+                className="absolute left-1/2 h-2 w-12 -translate-x-1/2 rounded-full bg-[#FF7F24] shadow-[0_0_12px_rgba(255,127,36,0.7)]"
                 style={{
                   bottom: `${getLevitationOffset(distance)}%`,
                 }}

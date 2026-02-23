@@ -33,7 +33,7 @@ const Card = React.forwardRef<
       ref={ref}
       className={cn(
         // Style: Navy Glass + White Border + Shadow
-        "rounded-xl border text-slate-50 shadow-lg relative overflow-hidden",
+        "relative overflow-hidden rounded-xl border text-slate-50 shadow-lg",
         variantClasses,
         accentClasses,
         className

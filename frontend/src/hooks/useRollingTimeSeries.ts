@@ -15,12 +15,13 @@ interface RollingSeriesOptions {
   sampleKey?: number | null
 }
 
+const ROLLING_SLOT_COUNT = 20
+
 export function useRollingTimeSeries(
   value: number | null | undefined,
   options: RollingSeriesOptions = {},
 ) {
   const { minIntervalMs = 500, sampleKey } = options
-  const slotCount = 20
   const [series, setSeries] = useState<RollingSeriesPoint[]>([])
   const lastAppendRef = useRef(0)
 
@@ -32,23 +33,25 @@ export function useRollingTimeSeries(
     lastAppendRef.current = now
 
     setSeries((prev) => {
+      // Store raw points and trim from the left to keep a fixed-size rolling window.
       const next = [...prev, { ts: now, value: typeof value === "number" ? value : null }]
-      if (next.length <= slotCount) return next
-      return next.slice(next.length - slotCount)
+      if (next.length <= ROLLING_SLOT_COUNT) return next
+      return next.slice(next.length - ROLLING_SLOT_COUNT)
     })
-  }, [value, sampleKey, minIntervalMs, slotCount])
+  }, [value, sampleKey, minIntervalMs])
 
   const paddedSeries = useMemo<RollingSeriesPointWithIndex[]>(() => {
-    const next = series.slice(-slotCount)
-    if (next.length < slotCount) {
-      const padding = Array.from({ length: slotCount - next.length }, () => ({
+    const next = series.slice(-ROLLING_SLOT_COUNT)
+    if (next.length < ROLLING_SLOT_COUNT) {
+      // Charts should keep stable axes from the first frame, so pad missing points.
+      const padding = Array.from({ length: ROLLING_SLOT_COUNT - next.length }, () => ({
         ts: Number.NaN,
         value: null,
       }))
       next.push(...padding)
     }
     return next.map((point, idx) => ({ ...point, idx }))
-  }, [series, slotCount])
+  }, [series])
 
   return paddedSeries
 }

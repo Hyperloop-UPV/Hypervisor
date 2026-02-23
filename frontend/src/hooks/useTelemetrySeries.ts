@@ -1,33 +1,40 @@
-import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries";
-import type { TelemetrySignals } from "@/hooks/useTelemetry";
+import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries"
+import type { TelemetrySignals } from "@/hooks/useTelemetry"
+
+const SERIES_SAMPLE_CONFIG = {
+  levitationDistance: 400,
+  levitationCurrent: 400,
+  levitationPower: 400,
+  dcBusVoltage: 500,
+  totalBatteryVoltage: 500,
+} as const
 
 export const useTelemetrySeries = (
   signals: TelemetrySignals,
-  lastUpdatedAt: number | null,
+  connectionUptimeSeconds: number | null,
 ) => {
+  // All chart sampling rates live in one map so tuning the dashboard cadence
+  // does not require hunting through repeated hook calls.
   const levitationDistance = useRollingTimeSeries(signals.levitationDistance, {
-    minIntervalMs: 400,
-    sampleKey: lastUpdatedAt,
-  });
+    minIntervalMs: SERIES_SAMPLE_CONFIG.levitationDistance,
+    sampleKey: connectionUptimeSeconds,
+  })
   const levitationCurrent = useRollingTimeSeries(signals.levitationCurrent, {
-    minIntervalMs: 400,
-    sampleKey: lastUpdatedAt,
-  });
+    minIntervalMs: SERIES_SAMPLE_CONFIG.levitationCurrent,
+    sampleKey: connectionUptimeSeconds,
+  })
   const levitationPower = useRollingTimeSeries(signals.levitationPower, {
-    minIntervalMs: 400,
-    sampleKey: lastUpdatedAt,
-  });
+    minIntervalMs: SERIES_SAMPLE_CONFIG.levitationPower,
+    sampleKey: connectionUptimeSeconds,
+  })
   const dcBusVoltage = useRollingTimeSeries(signals.dcBusVoltage, {
-    minIntervalMs: 500,
-    sampleKey: lastUpdatedAt,
-  });
-  const totalBatteryVoltage = useRollingTimeSeries(
-    signals.totalBatteryVoltage,
-    {
-      minIntervalMs: 500,
-      sampleKey: lastUpdatedAt,
-    },
-  );
+    minIntervalMs: SERIES_SAMPLE_CONFIG.dcBusVoltage,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const totalBatteryVoltage = useRollingTimeSeries(signals.totalBatteryVoltage, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.totalBatteryVoltage,
+    sampleKey: connectionUptimeSeconds,
+  })
 
   return {
     levitationDistance,
@@ -35,5 +42,5 @@ export const useTelemetrySeries = (
     levitationPower,
     dcBusVoltage,
     totalBatteryVoltage,
-  };
-};
+  }
+}

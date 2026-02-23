@@ -9,6 +9,7 @@ import {
 } from "recharts"
 import { axisTick, tooltipStyle } from "@/lib/demoHelpers"
 import type { TimeSeriesPoint } from "@/components/SmallChart"
+import { cn } from "@/lib/utils"
 
 type TimeSeriesDetailChartProps = {
   data: TimeSeriesPoint[]
@@ -34,7 +35,7 @@ export function LargeChart({
   formatTime,
 }: TimeSeriesDetailChartProps) {
   return (
-    <div className={`${heightClassName} min-h-[1px] min-w-[1px]`}>
+    <div className={cn("min-h-[1px] min-w-[1px]", heightClassName)}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />

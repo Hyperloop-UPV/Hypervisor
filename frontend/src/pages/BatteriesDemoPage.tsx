@@ -5,7 +5,6 @@ import { ChartCard } from "@/components/ChartCard"
 import { MetricCard } from "@/components/MetricCard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-
 const buildCellVoltageStats = (cells: { voltage?: number | null }[]) => {
   const voltages = cells
     .map((cell) => cell.voltage)
@@ -55,7 +54,7 @@ export function BatteriesDemoPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+        <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
           DC Bus Precharge & Pack Health
         </h1>
       </div>

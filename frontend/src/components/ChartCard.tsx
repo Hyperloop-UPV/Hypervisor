@@ -30,7 +30,7 @@ export function ChartCard({
       </CardHeader>
       <CardContent className="p-4 pt-2">
         <div className="flex items-baseline gap-3">
-          <div className="text-4xl sm:text-5xl font-black text-[#FF7F24]">{value}</div>
+          <div className="text-4xl font-black text-[#FF7F24] sm:text-5xl">{value}</div>
           <div className="text-sm font-bold uppercase text-white/60">{unit}</div>
         </div>
         <div className="mt-4">

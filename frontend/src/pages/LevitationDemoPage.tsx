@@ -23,7 +23,7 @@ export function LevitationDemoPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+        <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
           Levitation Distance & Control
         </h1>
       </div>

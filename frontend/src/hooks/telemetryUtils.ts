@@ -34,6 +34,14 @@ const measurementKey = (measurementId: string, boardId: number) =>
 const isObject = (payload: unknown): payload is UnknownObject =>
   typeof payload === "object" && payload !== null && !Array.isArray(payload);
 
+const isStatusValue = (value: unknown): value is string | null | undefined =>
+  value === null || value === undefined || typeof value === "string"
+
+const isStatusMap = (value: unknown): value is MeasurementStatus => {
+  if (!isObject(value)) return false
+  return Object.values(value).every(isStatusValue)
+}
+
 export const isMeasurementDictionary = (
   payload: unknown,
 ): payload is MeasurementDictionary => {

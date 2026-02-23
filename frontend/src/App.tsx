@@ -5,8 +5,8 @@ import { useTelemetry } from "./hooks/useTelemetry"
 import { useTelemetrySeries } from "./hooks/useTelemetrySeries"
 
 const App: React.FC = () => {
-  const { data, status, lastUpdatedAt, signals } = useTelemetry("/backend/stream")
-  const series = useTelemetrySeries(signals, lastUpdatedAt)
+  const { data, status, connectionUptimeSeconds, signals } = useTelemetry("/backend/stream")
+  const series = useTelemetrySeries(signals, connectionUptimeSeconds)
 
   const outletContext = useMemo(
     () => ({
@@ -14,12 +14,12 @@ const App: React.FC = () => {
       signals,
       series,
       status,
-      lastUpdatedAt,
+      connectionUptimeSeconds,
     }),
-    [data, signals, series, status, lastUpdatedAt],
+    [data, signals, series, status, connectionUptimeSeconds],
   )
   return (
-    <AppShell status={status} lastUpdatedAt={lastUpdatedAt}>
+    <AppShell status={status} connectionUptimeSeconds={connectionUptimeSeconds}>
       <Outlet context={outletContext} />
     </AppShell>
   )

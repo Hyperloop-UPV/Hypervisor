@@ -1,4 +1,5 @@
 import { LineChart, Line, ResponsiveContainer } from "recharts"
+import { cn } from "@/lib/utils"
 
 const defaultStroke = "#FF7F24"
 
@@ -18,7 +19,7 @@ export function SmallChart({
   strokeWidth = 2,
 }: TimeSeriesLineChartProps) {
   return (
-    <div className={`${heightClassName} w-full min-h-[1px] min-w-[1px]`}>
+    <div className={cn("min-h-[1px] min-w-[1px] w-full", heightClassName)}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <Line

@@ -15,5 +15,5 @@ export interface TelemetryOutletContext {
   signals: TelemetrySignals
   series: TelemetrySeries
   status: "connecting" | "open" | "closed"
-  lastUpdatedAt: number | null
+  connectionUptimeSeconds: number | null
 }

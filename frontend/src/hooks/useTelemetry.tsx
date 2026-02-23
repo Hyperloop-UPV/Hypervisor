@@ -7,6 +7,7 @@ import type {
 import {
   applyUpdateAndBuildTelemetry,
   buildTelemetryFromInitialDictionary,
+  getConnectionUptimeSeconds,
   getTelemetrySignals,
   hasMeasurementValues,
   isMeasurementDictionary,

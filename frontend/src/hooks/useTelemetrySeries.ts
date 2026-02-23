@@ -1,10 +1,20 @@
 import { useRollingTimeSeries } from "@/hooks/useRollingTimeSeries";
 import type { TelemetrySignals } from "@/hooks/useTelemetry";
 
+const SERIES_SAMPLE_CONFIG = {
+  levitationDistance: 400,
+  levitationCurrent: 400,
+  levitationPower: 400,
+  dcBusVoltage: 500,
+  totalBatteryVoltage: 500,
+} as const
+
 export const useTelemetrySeries = (
   signals: TelemetrySignals,
-  lastUpdatedAt: number | null,
+  connectionUptimeSeconds: number | null,
 ) => {
+  // All chart sampling rates live in one map so tuning the dashboard cadence
+  // does not require hunting through repeated hook calls.
   const levitationDistance = useRollingTimeSeries(signals.levitationDistance, {
     minIntervalMs: 400,
     sampleKey: lastUpdatedAt,

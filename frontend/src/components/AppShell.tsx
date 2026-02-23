@@ -1,9 +1,10 @@
 import { NavLink } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import logo from "@/assets/logo.svg"
+
 interface AppShellProps {
   status: "connecting" | "open" | "closed"
-  lastUpdatedAt: number | null
+  connectionUptimeSeconds: number | null
   children: React.ReactNode
 }
 
@@ -20,19 +21,21 @@ const navItems = [
 
 export function AppShell({
   status,
-  lastUpdatedAt,
+  connectionUptimeSeconds,
   children,
 }: AppShellProps) {
   const statusLabel = statusLabelMap[status]
-  const lastUpdated =
-    lastUpdatedAt !== null ? new Date(lastUpdatedAt).toLocaleTimeString() : "--:--:--"
+  const uptime =
+    connectionUptimeSeconds !== null
+      ? formatDuration(connectionUptimeSeconds)
+      : "--:--:--"
 
   return (
-    <div className="min-h-dvh w-full bg-[#20274C] text-[#EDEEF0] flex flex-col">
+    <div className="flex min-h-dvh w-full flex-col bg-[#20274C] text-[#EDEEF0]">
       <header className="w-full border-b border-white/10 bg-[#20274C]">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center">
               <img src={logo} alt="Hyperloop UPV" className="h-8 w-8" />
             </div>
             <div>
@@ -45,14 +48,14 @@ export function AppShell({
             </div>
           </div>
 
-          <nav className="w-full sm:w-auto flex items-stretch gap-2 bg-[#1a2035] p-1 rounded-full border border-white/10 h-11">
+          <nav className="flex h-11 w-full items-stretch gap-2 rounded-full border border-white/10 bg-[#1a2035] p-1 sm:w-auto">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex-1 h-full px-3 sm:px-4 py-2 rounded-full text-center text-[11px] sm:text-sm font-bold uppercase tracking-wider whitespace-nowrap leading-none transition-colors flex items-center justify-center",
+                    "flex h-full flex-1 items-center justify-center rounded-full px-3 py-2 text-center text-[11px] font-bold uppercase leading-none tracking-wider whitespace-nowrap transition-colors sm:px-4 sm:text-sm",
                     isActive
                       ? "bg-[#FF7F24] text-black"
                       : "text-[#EDEEF0]/70 hover:text-white",
@@ -64,7 +67,7 @@ export function AppShell({
             ))}
           </nav>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#EDEEF0]/70">
+          <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-[#EDEEF0]/70">
             <div className="flex items-center gap-2">
               <span
                 className={cn(
@@ -76,15 +79,25 @@ export function AppShell({
               />
               <span className="font-bold text-[#EDEEF0]">{statusLabel}</span>
             </div>
-            <div className="hidden sm:block">LAST UPDATE</div>
-            <div className="font-bold text-white">{lastUpdated}</div>
+            <div className="hidden sm:block">UPTIME</div>
+            <div className="font-bold text-white">{uptime}</div>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 w-full">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-6">{children}</div>
+      <main className="w-full flex-1">
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">{children}</div>
       </main>
     </div>
   )
+}
+
+const formatDuration = (totalSeconds: number) => {
+  // Backend sends uptime as elapsed seconds since stream start.
+  const safeSeconds = Math.max(0, Math.floor(totalSeconds))
+  const hours = Math.floor(safeSeconds / 3600)
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+  const seconds = safeSeconds % 60
+
+  return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":")
 }

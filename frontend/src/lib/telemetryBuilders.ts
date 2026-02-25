@@ -1,27 +1,11 @@
 import type { TelemetryData } from "@/types/telemetry"
 
 const lcuAirgapKeys = [
-  "lcu_airgap_1",
-  "lcu_airgap_2",
-  "lcu_airgap_3",
-  "lcu_airgap_4",
-  "lcu_airgap_5",
-  "lcu_airgap_6",
-  "lcu_airgap_7",
-  "lcu_airgap_8",
+  "lcu_airgap_std"
 ]
 
 const lcuCoilCurrentKeys = [
   "lcu_coil_current_1",
-  "lcu_coil_current_2",
-  "lcu_coil_current_3",
-  "lcu_coil_current_4",
-  "lcu_coil_current_5",
-  "lcu_coil_current_6",
-  "lcu_coil_current_7",
-  "lcu_coil_current_8",
-  "lcu_coil_current_9",
-  "lcu_coil_current_10",
 ]
 
 const PACK_COUNT = 18
@@ -40,11 +24,9 @@ export const buildLevitation = (getValue: (measurementId: string, boardId: numbe
   const levitationCurrent = mean(lcuCoilCurrentKeys.map((key) => getValue(key, BOARD_LCU)))
 
   const voltageReading = getValue("voltage_reading", BOARD_HVSCU)
-  const currentReading = getValue("current_reading", BOARD_HVSCU)
-  const levitationPower =
-    typeof voltageReading === "number" && typeof currentReading === "number"
-      ? voltageReading * currentReading
-      : null
+  //const currentReading = getValue("current_reading", BOARD_HVSCU)
+  const levitationPower = getValue("lcu_power", BOARD_LCU);
+
 
   return {
     levitation: {

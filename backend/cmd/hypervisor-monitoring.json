@@ -1,10 +1,9 @@
 {
   "4": {
-    "320": [
-      "lcu_coil_current_1"
-    ],
-    "318": [
-      "lcu_airgap_1"
+    "101": [
+      "lcu_coil_current_1",
+      "lcu_airgap_std",
+      "lcu_power"
     ]
   },
   "1": {
@@ -151,24 +150,6 @@
       "battery16_cell5",
       "battery16_cell6",
       "battery16_total_voltage"
-    ],
-    "926": [
-      "battery17_cell1",
-      "battery17_cell2",
-      "battery17_cell3",
-      "battery17_cell4",
-      "battery17_cell5",
-      "battery17_cell6",
-      "battery17_total_voltage"
-    ],
-    "927": [
-      "battery18_cell1",
-      "battery18_cell2",
-      "battery18_cell3",
-      "battery18_cell4",
-      "battery18_cell5",
-      "battery18_cell6",
-      "battery18_total_voltage"
     ],
     "928": [
       "batteries_voltage_reading"

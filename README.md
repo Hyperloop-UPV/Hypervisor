@@ -44,7 +44,7 @@ Full-stack real-time telemetry platform for public Hyperloop demos. Captures liv
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+![Hypervisor](docs/hvis.png)
 
 Hypervisor is a full-stack real-time telemetry and visualization platform developed at Hyperloop UPV for public demonstrations.
 

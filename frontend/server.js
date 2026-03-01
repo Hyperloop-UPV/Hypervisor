@@ -1,6 +1,8 @@
 import http from "node:http"
 
 const CONFIG = {
+  //port: 80,
+  //ssePath: "/backend/stream",
   port: 4040,
   ssePath: "/telemetry",
   broadcastIntervalMs: 500,

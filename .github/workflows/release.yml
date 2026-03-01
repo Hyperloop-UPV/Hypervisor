@@ -47,11 +47,13 @@ jobs:
             ~/go/pkg/mod
             ~/.cache/go-build
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
       # -------------------------
-      # Install ncap
+      # Install libpcap
       # -------------------------
       - name: Install libpcap
         run: sudo apt-get update && sudo apt-get install -y libpcap-dev
+
       # -------------------------
       # Build project
       # -------------------------
@@ -59,19 +61,30 @@ jobs:
         run: make build
 
       # -------------------------
-      # Create zip artifact
+      # Verify build output
+      # -------------------------
+      - name: Verify release folder
+        run: |
+          echo "Contents of project:"
+          ls -R
+          echo "Contents of release directory:"
+          ls -R release
+
+      # -------------------------
+      # Package release
       # -------------------------
       - name: Package release
         run: |
           VERSION=${GITHUB_REF_NAME}
-          zip -r release-${VERSION}.zip release
+          zip -r Hypervisor-${VERSION}.zip release
 
       # -------------------------
-      # Create GitHub Release
+      # Publish GitHub Release
       # -------------------------
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           name: Hypervisor ${{ github.ref_name }}
-          files: Hypervisor-*.zip
-
+          files: Hypervisor-${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

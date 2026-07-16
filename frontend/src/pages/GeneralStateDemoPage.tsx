@@ -25,29 +25,38 @@ const StatusPill = ({ label, ok }: { label: string; ok: boolean | null | undefin
 )
 
 export function GeneralStateDemoPage() {
-  const { data } = useOutletContext<TelemetryOutletContext>()
+  const { data, signals, series } = useOutletContext<TelemetryOutletContext>()
   const vehicleState = data?.vehicleState
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-          Vehicle State
+          Dashboard
         </h1>
       </div>
 
       <PodTrackVisualizer positionM={data?.propulsion?.positionM} />
 
-      <Card>
-        <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-xs font-bold uppercase tracking-[0.3em] text-white/60">
-            Master State Machine
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-2">
-          <div className="text-3xl font-black text-[#FF7F24]">{formatState(vehicleState?.state)}</div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <Card>
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-[0.3em] text-white/60">
+              Vehicle State
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-2">
+            <div className="text-3xl font-black text-[#FF7F24]">{formatState(vehicleState?.state)}</div>
+          </CardContent>
+        </Card>
+
+        <MetricCard
+          title="Speed"
+          value={formatValue(signals.propulsionSpeed)}
+          unit={signals.propulsionSpeedUnit}
+          chartData={series.propulsionSpeed}
+        />
+      </div>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-bold text-white">Pneumatics</h2>

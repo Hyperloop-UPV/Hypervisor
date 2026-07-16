@@ -41,13 +41,8 @@ export function AppShell({
               <div className="flex h-9 w-9 shrink-0 items-center justify-center sm:h-10 sm:w-10">
                 <img src={logo} alt="Hyperloop UPV" className="h-7 w-7 sm:h-8 sm:w-8" />
               </div>
-              <div>
-                <div className="text-lg font-black tracking-tight text-white sm:text-xl lg:text-2xl">
-                  HYPERVISOR
-                </div>
-                <div className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#EDEEF0]/60 sm:text-[10px]">
-                  DEMO DASHBOARD
-                </div>
+              <div className="text-lg font-black tracking-tight text-white sm:text-xl lg:text-2xl">
+                HYPERVISOR
               </div>
             </div>
 

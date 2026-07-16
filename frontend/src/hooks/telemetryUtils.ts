@@ -156,6 +156,15 @@ export const getTelemetrySignals = (data: TelemetryData | null) => {
   const propulsionSpeed = data?.propulsion?.speedKmH ?? null
   const propulsionCurrent = data?.propulsion?.actualCurrentRef ?? null
   const propulsionFrequency = data?.propulsion?.frequency ?? null
+  const propulsionDutyU = data?.propulsion?.dutyU ?? null
+  const propulsionDutyV = data?.propulsion?.dutyV ?? null
+  const propulsionDutyW = data?.propulsion?.dutyW ?? null
+  const propulsionCurrentUA = data?.propulsion?.currentSensors.uA ?? null
+  const propulsionCurrentVA = data?.propulsion?.currentSensors.vA ?? null
+  const propulsionCurrentWA = data?.propulsion?.currentSensors.wA ?? null
+  const propulsionCurrentUB = data?.propulsion?.currentSensors.uB ?? null
+  const propulsionCurrentVB = data?.propulsion?.currentSensors.vB ?? null
+  const propulsionCurrentWB = data?.propulsion?.currentSensors.wB ?? null
 
   const unitsByMeasurementKey = data?.unitsByMeasurementKey ?? {}
 
@@ -174,6 +183,15 @@ export const getTelemetrySignals = (data: TelemetryData | null) => {
     propulsionSpeed,
     propulsionCurrent,
     propulsionFrequency,
+    propulsionDutyU,
+    propulsionDutyV,
+    propulsionDutyW,
+    propulsionCurrentUA,
+    propulsionCurrentVA,
+    propulsionCurrentWA,
+    propulsionCurrentUB,
+    propulsionCurrentVB,
+    propulsionCurrentWB,
     levitationDistanceUnit: unitFor(
       SIGNAL_UNITS.levitationDistance.measurementId,
       SIGNAL_UNITS.levitationDistance.boardId,

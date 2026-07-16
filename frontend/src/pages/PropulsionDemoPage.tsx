@@ -3,8 +3,19 @@ import type { TelemetryOutletContext } from "@/types/app"
 import { formatBoolean, formatState, formatTime, formatValue } from "@/lib/demoHelpers"
 import { ChartCard } from "@/components/ChartCard"
 import { MetricCard } from "@/components/MetricCard"
+import { MultiLineChart, type MultiLineSeries } from "@/components/MultiLineChart"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+
+// Shared U/V/W color mapping so duty cycles and phase currents read as the
+// same three phases across both charts.
+const PHASE_COLORS = {
+  u: "#FF7F24",
+  v: "#38BDF8",
+  w: "#A78BFA",
+} as const
+
+const CONNECTOR_B_DASH = "6 4"
 
 const StatTile = ({ label, value, unit }: { label: string; value: number | null | undefined; unit: string }) => (
   <div className="rounded-lg border border-white/10 bg-[#141a2b] p-3">
@@ -14,6 +25,34 @@ const StatTile = ({ label, value, unit }: { label: string; value: number | null 
       <span className="ml-2 text-xs font-bold text-white/50">{unit}</span>
     </div>
   </div>
+)
+
+type PhaseLine = MultiLineSeries & { value: number | null | undefined }
+
+const PhaseChartCard = ({ title, lines, unit }: { title: string; lines: PhaseLine[]; unit: string }) => (
+  <section className="flex flex-col gap-3">
+    <h2 className="text-lg font-bold text-white">{title}</h2>
+    <Card>
+      <CardContent className="p-4 pt-4">
+        <div className="mb-4 flex flex-wrap gap-4">
+          {lines.map((line) => (
+            <div key={line.key} className="flex items-center gap-2">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: line.color, opacity: line.dash ? 0.55 : 1 }}
+              />
+              <span className="text-xs font-bold uppercase tracking-wider text-white/60">{line.label}</span>
+              <span className="text-sm font-black text-white">
+                {formatValue(line.value)}
+                {unit}
+              </span>
+            </div>
+          ))}
+        </div>
+        <MultiLineChart series={lines} unit={unit} heightClassName="h-64" formatTime={formatTime} />
+      </CardContent>
+    </Card>
+  </section>
 )
 
 const StatusPill = ({ label, ok }: { label: string; ok: boolean | null | undefined }) => (
@@ -42,6 +81,21 @@ export function PropulsionDemoPage() {
 
   const speedLabel = formatValue(propulsionSpeed)
   const currentLabel = formatValue(propulsionCurrent)
+
+  const dutyLines: PhaseLine[] = [
+    { key: "dutyU", label: "Duty U", color: PHASE_COLORS.u, value: propulsion?.dutyU, data: series.propulsionDutyU },
+    { key: "dutyV", label: "Duty V", color: PHASE_COLORS.v, value: propulsion?.dutyV, data: series.propulsionDutyV },
+    { key: "dutyW", label: "Duty W", color: PHASE_COLORS.w, value: propulsion?.dutyW, data: series.propulsionDutyW },
+  ]
+
+  const phaseCurrentLines: PhaseLine[] = [
+    { key: "currentUA", label: "U - A", color: PHASE_COLORS.u, value: propulsion?.currentSensors.uA, data: series.propulsionCurrentUA },
+    { key: "currentVA", label: "V - A", color: PHASE_COLORS.v, value: propulsion?.currentSensors.vA, data: series.propulsionCurrentVA },
+    { key: "currentWA", label: "W - A", color: PHASE_COLORS.w, value: propulsion?.currentSensors.wA, data: series.propulsionCurrentWA },
+    { key: "currentUB", label: "U - B", color: PHASE_COLORS.u, value: propulsion?.currentSensors.uB, data: series.propulsionCurrentUB, dash: CONNECTOR_B_DASH },
+    { key: "currentVB", label: "V - B", color: PHASE_COLORS.v, value: propulsion?.currentSensors.vB, data: series.propulsionCurrentVB, dash: CONNECTOR_B_DASH },
+    { key: "currentWB", label: "W - B", color: PHASE_COLORS.w, value: propulsion?.currentSensors.wB, data: series.propulsionCurrentWB, dash: CONNECTOR_B_DASH },
+  ]
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,26 +144,10 @@ export function PropulsionDemoPage() {
         <MetricCard title="Peak Current" value={formatValue(propulsion?.currentPeak)} unit="A" />
       </div>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-bold text-white">PWM Duty Cycles</h2>
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
-          <StatTile label="Duty U" value={propulsion?.dutyU} unit="%" />
-          <StatTile label="Duty V" value={propulsion?.dutyV} unit="%" />
-          <StatTile label="Duty W" value={propulsion?.dutyW} unit="%" />
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-bold text-white">Phase Currents</h2>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 xl:grid-cols-6">
-          <StatTile label="U - A" value={propulsion?.currentSensors.uA} unit="A" />
-          <StatTile label="V - A" value={propulsion?.currentSensors.vA} unit="A" />
-          <StatTile label="W - A" value={propulsion?.currentSensors.wA} unit="A" />
-          <StatTile label="U - B" value={propulsion?.currentSensors.uB} unit="A" />
-          <StatTile label="V - B" value={propulsion?.currentSensors.vB} unit="A" />
-          <StatTile label="W - B" value={propulsion?.currentSensors.wB} unit="A" />
-        </div>
-      </section>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <PhaseChartCard title="PWM Duty Cycles" lines={dutyLines} unit="%" />
+        <PhaseChartCard title="Phase Currents" lines={phaseCurrentLines} unit="A" />
+      </div>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-bold text-white">Gate Driver</h2>

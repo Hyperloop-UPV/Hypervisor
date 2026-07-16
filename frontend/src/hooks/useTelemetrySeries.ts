@@ -9,6 +9,15 @@ const SERIES_SAMPLE_CONFIG = {
   totalBatteryVoltage: 500,
   propulsionSpeed: 400,
   propulsionCurrent: 400,
+  propulsionDutyU: 300,
+  propulsionDutyV: 300,
+  propulsionDutyW: 300,
+  propulsionCurrentUA: 300,
+  propulsionCurrentVA: 300,
+  propulsionCurrentWA: 300,
+  propulsionCurrentUB: 300,
+  propulsionCurrentVB: 300,
+  propulsionCurrentWB: 300,
 } as const
 
 export const useTelemetrySeries = (
@@ -45,6 +54,42 @@ export const useTelemetrySeries = (
     minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrent,
     sampleKey: connectionUptimeSeconds,
   })
+  const propulsionDutyU = useRollingTimeSeries(signals.propulsionDutyU, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionDutyU,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionDutyV = useRollingTimeSeries(signals.propulsionDutyV, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionDutyV,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionDutyW = useRollingTimeSeries(signals.propulsionDutyW, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionDutyW,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionCurrentUA = useRollingTimeSeries(signals.propulsionCurrentUA, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrentUA,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionCurrentVA = useRollingTimeSeries(signals.propulsionCurrentVA, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrentVA,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionCurrentWA = useRollingTimeSeries(signals.propulsionCurrentWA, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrentWA,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionCurrentUB = useRollingTimeSeries(signals.propulsionCurrentUB, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrentUB,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionCurrentVB = useRollingTimeSeries(signals.propulsionCurrentVB, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrentVB,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionCurrentWB = useRollingTimeSeries(signals.propulsionCurrentWB, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrentWB,
+    sampleKey: connectionUptimeSeconds,
+  })
 
   return {
     levitationDistance,
@@ -54,5 +99,14 @@ export const useTelemetrySeries = (
     totalBatteryVoltage,
     propulsionSpeed,
     propulsionCurrent,
+    propulsionDutyU,
+    propulsionDutyV,
+    propulsionDutyW,
+    propulsionCurrentUA,
+    propulsionCurrentVA,
+    propulsionCurrentWA,
+    propulsionCurrentUB,
+    propulsionCurrentVB,
+    propulsionCurrentWB,
   }
 }

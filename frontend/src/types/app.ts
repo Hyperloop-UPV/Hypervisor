@@ -8,6 +8,8 @@ export type TelemetrySeries = {
   levitationPower: TimeSeriesPoint[]
   dcBusVoltage: TimeSeriesPoint[]
   totalBatteryVoltage: TimeSeriesPoint[]
+  propulsionSpeed: TimeSeriesPoint[]
+  propulsionCurrent: TimeSeriesPoint[]
 }
 
 export interface TelemetryOutletContext {

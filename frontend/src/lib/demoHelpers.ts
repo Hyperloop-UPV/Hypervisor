@@ -14,3 +14,8 @@ export const tooltipStyle = {
 
 export const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max)
+
+export const formatState = (value: string | null | undefined) => value ?? "--"
+
+export const formatBoolean = (value: boolean | null | undefined) =>
+  value === null || value === undefined ? "--" : value ? "YES" : "NO"

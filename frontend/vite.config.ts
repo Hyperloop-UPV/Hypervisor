@@ -12,8 +12,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      // Override for local testing against the mock server, e.g.:
+      //   HYPERVISOR_BACKEND=http://localhost:4040 npm run dev
       "/backend": {
-        target: "http://localhost:80",
+        target: process.env.HYPERVISOR_BACKEND || "http://localhost:80",
         changeOrigin: true,
       },
     },

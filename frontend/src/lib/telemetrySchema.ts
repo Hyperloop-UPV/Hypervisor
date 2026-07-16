@@ -1,60 +1,82 @@
 // Keep telemetry measurement ids and board ids in one place so parsing, units, and builders stay in sync.
+// Board ids and measurement ids come from the ADJ repo (Astra branch): https://github.com/Hyperloop-UPV/adj
 export const TELEMETRY_BOARD = {
-  hvscu: 1,
+  vcu: 3,
   lcu: 4,
+  pcu: 5,
+  hvbms: 7,
 } as const
 
 export const LCU_AIRGAP_KEYS = [
-  "lcu_airgap_1",
-  "lcu_airgap_2",
-  "lcu_airgap_3",
-  "lcu_airgap_4",
-  "lcu_airgap_5",
-  "lcu_airgap_6",
-  "lcu_airgap_7",
-  "lcu_airgap_8",
+  "airgap_1",
+  "airgap_2",
+  "airgap_3",
+  "airgap_4",
+  "airgap_5",
+  "airgap_6",
+  "airgap_7",
+  "airgap_8",
 ] as const
 
 export const LCU_COIL_CURRENT_KEYS = [
-  "lcu_coil_current_1",
-  "lcu_coil_current_2",
-  "lcu_coil_current_3",
-  "lcu_coil_current_4",
-  "lcu_coil_current_5",
-  "lcu_coil_current_6",
-  "lcu_coil_current_7",
-  "lcu_coil_current_8",
-  "lcu_coil_current_9",
-  "lcu_coil_current_10",
+  "coil_current_1",
+  "coil_current_2",
+  "coil_current_3",
+  "coil_current_4",
+  "coil_current_5",
+  "coil_current_6",
+  "coil_current_7",
+  "coil_current_8",
+  "coil_current_9",
+  "coil_current_10",
 ] as const
 
-export const BATTERY_PACK_COUNT = 18
-export const BATTERY_CELLS_PER_PACK = 6
+// Physical length of the test track the pod runs on.
+export const TRACK_LENGTH_M = 48
+
+export const BATTERY_PACK_COUNT = 8
+export const BATTERY_CELLS_PER_PACK = 12
+export const BATTERY_TEMPS_PER_PACK = 4
 
 export const SIGNAL_UNITS = {
   levitationDistance: {
-    measurementId: "lcu_airgap_1",
+    measurementId: "airgap_1",
     boardId: TELEMETRY_BOARD.lcu,
     fallback: "mm",
   },
   levitationCurrent: {
-    measurementId: "lcu_coil_current_1",
+    measurementId: "coil_current_1",
     boardId: TELEMETRY_BOARD.lcu,
     fallback: "A",
   },
   dcBusVoltage: {
     measurementId: "voltage_reading",
-    boardId: TELEMETRY_BOARD.hvscu,
+    boardId: TELEMETRY_BOARD.hvbms,
     fallback: "V",
   },
   totalBatteryVoltage: {
     measurementId: "batteries_voltage_reading",
-    boardId: TELEMETRY_BOARD.hvscu,
+    boardId: TELEMETRY_BOARD.hvbms,
     fallback: "V",
   },
   packVoltage: {
     measurementId: "battery1_total_voltage",
-    boardId: TELEMETRY_BOARD.hvscu,
+    boardId: TELEMETRY_BOARD.hvbms,
     fallback: "V",
+  },
+  propulsionSpeed: {
+    measurementId: "imu_speed_km_h",
+    boardId: TELEMETRY_BOARD.pcu,
+    fallback: "km/h",
+  },
+  propulsionCurrent: {
+    measurementId: "actual_current_ref",
+    boardId: TELEMETRY_BOARD.pcu,
+    fallback: "A",
+  },
+  propulsionFrequency: {
+    measurementId: "frequency",
+    boardId: TELEMETRY_BOARD.pcu,
+    fallback: "Hz",
   },
 } as const

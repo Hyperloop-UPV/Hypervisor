@@ -7,6 +7,8 @@ const SERIES_SAMPLE_CONFIG = {
   levitationPower: 400,
   dcBusVoltage: 500,
   totalBatteryVoltage: 500,
+  propulsionSpeed: 400,
+  propulsionCurrent: 400,
 } as const
 
 export const useTelemetrySeries = (
@@ -35,6 +37,14 @@ export const useTelemetrySeries = (
     minIntervalMs: SERIES_SAMPLE_CONFIG.totalBatteryVoltage,
     sampleKey: connectionUptimeSeconds,
   })
+  const propulsionSpeed = useRollingTimeSeries(signals.propulsionSpeed, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionSpeed,
+    sampleKey: connectionUptimeSeconds,
+  })
+  const propulsionCurrent = useRollingTimeSeries(signals.propulsionCurrent, {
+    minIntervalMs: SERIES_SAMPLE_CONFIG.propulsionCurrent,
+    sampleKey: connectionUptimeSeconds,
+  })
 
   return {
     levitationDistance,
@@ -42,5 +52,7 @@ export const useTelemetrySeries = (
     levitationPower,
     dcBusVoltage,
     totalBatteryVoltage,
+    propulsionSpeed,
+    propulsionCurrent,
   }
 }

@@ -1,4 +1,9 @@
-import { buildBatteryData, buildLevitation } from "@/lib/telemetryBuilders"
+import {
+  buildBatteryData,
+  buildLevitation,
+  buildPropulsion,
+  buildVehicleState,
+} from "@/lib/telemetryBuilders"
 import { SIGNAL_UNITS } from "@/lib/telemetrySchema"
 import type { TelemetryData } from "@/types/telemetry"
 
@@ -90,6 +95,7 @@ export const hasMeasurementValues = (dictionary: MeasurementDictionary) =>
 
 const buildTelemetryLookup = (dictionary: MeasurementDictionary) => {
   const values: Record<string, number | null> = {}
+  const raw: Record<string, string | null> = {}
   const units: UnitsByMeasurementKey = {}
 
   for (const entry of Object.values(dictionary)) {
@@ -101,23 +107,28 @@ const buildTelemetryLookup = (dictionary: MeasurementDictionary) => {
 
     const key = measurementKey(entry.measurement_id, entry.board_id)
     values[key] = normalizeTelemetryValue(entry.value)
+    raw[key] = entry.value ?? null
 
     if (entry.display_units !== undefined) {
       units[key] = entry.display_units
     }
   }
 
-  return { values, units }
+  return { values, raw, units }
 }
 
 const buildTelemetryData = (dictionary: MeasurementDictionary): TelemetryData => {
-  const { values, units } = buildTelemetryLookup(dictionary)
+  const { values, raw, units } = buildTelemetryLookup(dictionary)
   const getValue = (measurementId: string, boardId: number) =>
     values[measurementKey(measurementId, boardId)] ?? null
+  const getRaw = (measurementId: string, boardId: number) =>
+    raw[measurementKey(measurementId, boardId)] ?? null
 
   return {
     ...buildLevitation(getValue),
     ...buildBatteryData(getValue),
+    ...buildPropulsion(getValue, getRaw),
+    ...buildVehicleState(getValue, getRaw),
     unitsByMeasurementKey: units,
   }
 }
@@ -141,6 +152,11 @@ export const getTelemetrySignals = (data: TelemetryData | null) => {
 
   const dcBusVoltage = data?.dcBusVoltage ?? null
   const totalBatteryVoltage = data?.totalBatteryVoltage ?? null
+
+  const propulsionSpeed = data?.propulsion?.speedKmH ?? null
+  const propulsionCurrent = data?.propulsion?.actualCurrentRef ?? null
+  const propulsionFrequency = data?.propulsion?.frequency ?? null
+
   const unitsByMeasurementKey = data?.unitsByMeasurementKey ?? {}
 
   const unitFor = (
@@ -155,6 +171,9 @@ export const getTelemetrySignals = (data: TelemetryData | null) => {
     levitationPower,
     dcBusVoltage,
     totalBatteryVoltage,
+    propulsionSpeed,
+    propulsionCurrent,
+    propulsionFrequency,
     levitationDistanceUnit: unitFor(
       SIGNAL_UNITS.levitationDistance.measurementId,
       SIGNAL_UNITS.levitationDistance.boardId,
@@ -179,6 +198,21 @@ export const getTelemetrySignals = (data: TelemetryData | null) => {
       SIGNAL_UNITS.packVoltage.measurementId,
       SIGNAL_UNITS.packVoltage.boardId,
       SIGNAL_UNITS.packVoltage.fallback,
+    ),
+    propulsionSpeedUnit: unitFor(
+      SIGNAL_UNITS.propulsionSpeed.measurementId,
+      SIGNAL_UNITS.propulsionSpeed.boardId,
+      SIGNAL_UNITS.propulsionSpeed.fallback,
+    ),
+    propulsionCurrentUnit: unitFor(
+      SIGNAL_UNITS.propulsionCurrent.measurementId,
+      SIGNAL_UNITS.propulsionCurrent.boardId,
+      SIGNAL_UNITS.propulsionCurrent.fallback,
+    ),
+    propulsionFrequencyUnit: unitFor(
+      SIGNAL_UNITS.propulsionFrequency.measurementId,
+      SIGNAL_UNITS.propulsionFrequency.boardId,
+      SIGNAL_UNITS.propulsionFrequency.fallback,
     ),
   }
 }
